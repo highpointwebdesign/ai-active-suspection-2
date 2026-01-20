@@ -1,0 +1,28 @@
+[
+  {
+    "name": "Build and Upload",
+    "description": "Compile firmware and upload to ESP32",
+    "steps": [
+      "Open platformio.ini and verify board and port settings",
+      "Connect ESP32 via USB",
+      "Run: platformio run --target upload",
+      "Monitor serial output at 115200 baud"
+    ]
+  },
+  {
+    "name": "Monitor Serial",
+    "description": "View ESP32 debug output",
+    "steps": [
+      "Connect ESP32 via USB",
+      "Run: platformio device monitor --baud 115200"
+    ]
+  },
+  {
+    "name": "Erase Flash",
+    "description": "Clear all ESP32 flash memory (use if configuration is corrupted)",
+    "steps": [
+      "Connect ESP32 via USB",
+      "Run: platformio run --target erase"
+    ]
+  }
+]

@@ -1,0 +1,19 @@
+{
+  "name": "ESP32 Active Suspension",
+  "version": "1.0.0",
+  "description": "Firmware for ESP32 with MPU6050 sensor for managin RC vehicle suspension with web-based configuration",
+  "keywords": [
+    "ESP32",
+    "MPU6050",
+    "suspension",
+    "RC",
+    "sensor fusion",
+    "servo control",
+    "web server"
+  ],
+  "author": "Savage Cat Racing",
+  "repository": {
+    "type": "git",
+    "url": ""
+  }
+}
