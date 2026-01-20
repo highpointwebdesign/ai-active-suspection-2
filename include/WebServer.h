@@ -51,19 +51,51 @@ public:
   
 private:
   void startWiFiAP() {
-    WiFi.mode(WIFI_AP);
-    WiFi.softAP(WIFI_SSID, WIFI_PASSWORD);
+    // First, try to connect to home WiFi
+    Serial.println("Attempting to connect to home WiFi...");
+    Serial.print("SSID: ");
+    Serial.println(HOME_WIFI_SSID);
     
-    IPAddress ip(WIFI_AP_IP);
-    IPAddress gateway(WIFI_AP_GATEWAY);
-    IPAddress subnet(WIFI_AP_SUBNET);
+    WiFi.mode(WIFI_STA);
+    WiFi.begin(HOME_WIFI_SSID, HOME_WIFI_PASSWORD);
     
-    WiFi.softAPConfig(ip, gateway, subnet);
+    unsigned long startAttemptTime = millis();
     
-    Serial.print("WiFi AP started: ");
-    Serial.println(WIFI_SSID);
-    Serial.print("IP address: ");
-    Serial.println(WiFi.softAPIP());
+    // Wait for connection with timeout
+    while (WiFi.status() != WL_CONNECTED && 
+           millis() - startAttemptTime < WIFI_CONNECT_TIMEOUT) {
+      delay(500);
+      Serial.print(".");
+    }
+    Serial.println();
+    
+    // Check if connected to home WiFi
+    if (WiFi.status() == WL_CONNECTED) {
+      Serial.println("✓ Connected to home WiFi!");
+      Serial.print("IP address: ");
+      Serial.println(WiFi.localIP());
+      Serial.print("Access web interface at: http://");
+      Serial.println(WiFi.localIP());
+    } else {
+      // Connection failed, fall back to AP mode
+      Serial.println("✗ Failed to connect to home WiFi");
+      Serial.println("Starting Access Point mode...");
+      
+      WiFi.mode(WIFI_AP);
+      WiFi.softAP(WIFI_AP_SSID, WIFI_AP_PASSWORD);
+      
+      IPAddress ip(WIFI_AP_IP);
+      IPAddress gateway(WIFI_AP_GATEWAY);
+      IPAddress subnet(WIFI_AP_SUBNET);
+      
+      WiFi.softAPConfig(ip, gateway, subnet);
+      
+      Serial.print("WiFi AP started: ");
+      Serial.println(WIFI_AP_SSID);
+      Serial.print("IP address: ");
+      Serial.println(WiFi.softAPIP());
+      Serial.println("Access web interface at: http://192.168.4.1");
+    }
   }
   
   void setupRoutes() {

@@ -24,9 +24,14 @@
 #define DEFAULT_FRONT_REAR_BALANCE 0.5f
 #define DEFAULT_STIFFNESS 1.0f
 
-// WiFi configuration
-#define WIFI_SSID "ESP32-Suspension"
-#define WIFI_PASSWORD "12345678"
+// WiFi configuration - Home network (STA mode)
+#define HOME_WIFI_SSID "YOUR_HOME_WIFI_NAME"  // Change this to your WiFi name
+#define HOME_WIFI_PASSWORD "YOUR_HOME_WIFI_PASSWORD"  // Change this to your WiFi password
+#define WIFI_CONNECT_TIMEOUT 30000  // 30 seconds timeout
+
+// WiFi configuration - Access Point mode (fallback)
+#define WIFI_AP_SSID "ESP32-Suspension"
+#define WIFI_AP_PASSWORD "12345678"
 #define WIFI_AP_IP 192, 168, 4, 1
 #define WIFI_AP_GATEWAY 192, 168, 4, 1
 #define WIFI_AP_SUBNET 255, 255, 255, 0
