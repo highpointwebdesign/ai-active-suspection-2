@@ -427,9 +427,7 @@ private:
         
         <div class="button-group">
             <button class="btn-reset" onclick="resetConfig()">Reset to Defaults</button>
-        </div>
-        
-        <div class="button-group">
+       
             <button class="btn-reset" onclick="recalibrateIMU()" style="width: 100%; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; border: none;">Recalibrate IMU</button>
         </div>
         
