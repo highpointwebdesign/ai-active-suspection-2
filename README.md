@@ -2,7 +2,7 @@
 
 # ESP32 Active Suspension Simulator
 
-A complete firmware solution for ESP32 microcontroller that simulates RC vehicle suspension behavior using an MPU6050 accelerometer/gyroscope sensor. Features real-time sensor fusion, configurable suspension simulation, PWM servo outputs, and a mobile-friendly web interface for live configuration.
+A complete firmware solution for ESP32 microcontroller that simulates RC vehicle suspension behavior using an MPU6050 accelerometer/gyroscope sensor. Features real-time sensor readings, configurable suspension simulation, PWM servo outputs, and a mobile-friendly web interface for live configuration.
 
 ## Features
 
