@@ -3,6 +3,7 @@
 
 #include <Arduino.h>
 #include <cmath>
+#include "Config.h"
 
 class SensorFusion {
 private:
@@ -28,6 +29,51 @@ private:
   
   // Gravity reference
   static constexpr float GRAVITY = 9.81f;
+  
+  // MPU6050 orientation
+  uint8_t mpuOrientation = ARROW_FORWARD_UP;
+  
+  // Remap sensor axes to vehicle axes based on orientation
+  void remapAxes(float sensorX, float sensorY, float sensorZ, 
+                 float& vehicleForward, float& vehicleRight, float& vehicleUp) {
+    switch (mpuOrientation) {
+      case ARROW_FORWARD_UP:  // Default: Arrow forward, chip up
+        vehicleForward = sensorX;
+        vehicleRight = sensorY;
+        vehicleUp = sensorZ;
+        break;
+      case ARROW_UP_FORWARD:  // Arrow up, chip forward
+        vehicleForward = -sensorZ;
+        vehicleRight = sensorY;
+        vehicleUp = sensorX;
+        break;
+      case ARROW_BACKWARD_UP:  // Arrow backward, chip up
+        vehicleForward = -sensorX;
+        vehicleRight = -sensorY;
+        vehicleUp = sensorZ;
+        break;
+      case ARROW_DOWN_FORWARD:  // Arrow down, chip forward
+        vehicleForward = sensorZ;
+        vehicleRight = sensorY;
+        vehicleUp = -sensorX;
+        break;
+      case ARROW_RIGHT_UP:  // Arrow right, chip up
+        vehicleForward = -sensorY;
+        vehicleRight = sensorX;
+        vehicleUp = sensorZ;
+        break;
+      case ARROW_LEFT_UP:  // Arrow left, chip up
+        vehicleForward = sensorY;
+        vehicleRight = -sensorX;
+        vehicleUp = sensorZ;
+        break;
+      default:
+        vehicleForward = sensorX;
+        vehicleRight = sensorY;
+        vehicleUp = sensorZ;
+        break;
+    }
+  }
 
 public:
   void init(uint16_t sampleRate) {
@@ -35,7 +81,18 @@ public:
     lastUpdateTime = millis();
   }
   
+  void setOrientation(uint8_t orientation) {
+    mpuOrientation = orientation;
+  }
+  
   void update(float ax, float ay, float az, float gx, float gy, float gz) {
+    // Remap sensor axes to vehicle coordinate system
+    float axVehicle, ayVehicle, azVehicle;
+    float gxVehicle, gyVehicle, gzVehicle;
+    
+    remapAxes(ax, ay, az, axVehicle, ayVehicle, azVehicle);
+    remapAxes(gx, gy, gz, gxVehicle, gyVehicle, gzVehicle);
+    
     // Calculate time delta
     unsigned long currentTime = millis();
     dt = (currentTime - lastUpdateTime) / 1000.0f;
@@ -43,18 +100,18 @@ public:
     
     if (dt > 0.1f) dt = 0.02f;  // Clamp to prevent jumps
     
-    // Accelerometer angles
-    float accelRoll = atan2f(ay, az) * 57.2957795f;  // rad to deg
-    float accelPitch = asinf(-ax / GRAVITY) * 57.2957795f;
+    // Accelerometer angles (using remapped vehicle axes)
+    float accelRoll = atan2f(ayVehicle, azVehicle) * 57.2957795f;  // rad to deg
+    float accelPitch = atan2f(axVehicle, sqrtf(ayVehicle * ayVehicle + azVehicle * azVehicle)) * 57.2957795f;
     
-    // Complementary filter for roll and pitch
-    roll = ALPHA * (roll + gx * dt) + (1.0f - ALPHA) * accelRoll;
-    pitch = ALPHA * (pitch + gy * dt) + (1.0f - ALPHA) * accelPitch;
-    yaw += gz * dt;
+    // Complementary filter for roll and pitch (using remapped vehicle gyro axes)
+    roll = ALPHA * (roll + gxVehicle * dt) + (1.0f - ALPHA) * accelRoll;
+    pitch = ALPHA * (pitch + gyVehicle * dt) + (1.0f - ALPHA) * accelPitch;
+    yaw += gzVehicle * dt;
     
-    // Calculate vertical acceleration in world frame
+    // Calculate vertical acceleration in world frame (using remapped vehicle axes)
     // Remove gravity component
-    verticalAccel = az - 1.0f;  // Assume gravity is in Z axis when level
+    verticalAccel = azVehicle - 1.0f;  // Gravity is 1.0g when level
     
     // Low-pass filter vertical acceleration
     filteredVerticalAccel = 0.9f * filteredVerticalAccel + 0.1f * verticalAccel;
@@ -79,7 +136,7 @@ public:
       
       // Calculate angles from accelerometer
       float accelRoll = atan2f(accelY, accelZ) * 57.2957795f;
-      float accelPitch = asinf(-accelX / GRAVITY) * 57.2957795f;
+      float accelPitch = atan2f(accelX, sqrtf(accelY * accelY + accelZ * accelZ)) * 57.2957795f;
       
       rollSum += accelRoll;
       pitchSum += accelPitch;

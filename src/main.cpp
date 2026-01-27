@@ -28,6 +28,30 @@ unsigned long lastSimulationTime = 0;
 // Development mode flag
 bool mpuConnected = false;
 
+// Battery monitoring variables
+float batteryVoltages[3] = {0.0f, 0.0f, 0.0f}; // Voltages for 3 batteries
+unsigned long lastBatteryReadTime = 0;
+const unsigned long BATTERY_READ_INTERVAL = 500; // Read batteries every 500ms
+
+// Function to read battery voltage from ADC pin
+float readBatteryVoltage(uint8_t plugAssignment) {
+  if (plugAssignment == 0) return 0.0f; // No plug assigned
+  
+  int adcPin;
+  if (plugAssignment == 1) adcPin = BATTERY_ADC_PIN_A; // GPIO 34
+  else if (plugAssignment == 2) adcPin = BATTERY_ADC_PIN_B; // GPIO 35
+  else if (plugAssignment == 3) adcPin = BATTERY_ADC_PIN_C; // GPIO 32
+  else return 0.0f;
+  
+  // Read ADC value (12-bit: 0-4095)
+  int adcValue = analogRead(adcPin);
+  
+  // Calculate voltage: (ADC / 4095) * 3.3V * voltage_divider_ratio
+  float voltage = (adcValue / BATTERY_ADC_RESOLUTION) * BATTERY_VREF * BATTERY_VOLTAGE_DIVIDER_RATIO;
+  
+  return voltage;
+}
+
 void setup() {
   Serial.begin(115200);
   delay(500);
@@ -50,14 +74,45 @@ void setup() {
   Wire.begin(21, 22); // SDA=21, SCL=22 for most ESP32 boards
   delay(100);
   
+  Serial.println("Testing MPU6050 connection...");
+  Serial.println("Scanning I2C bus...");
+  
+  // Scan I2C bus
+  byte error, address;
+  int nDevices = 0;
+  for(address = 1; address < 127; address++ ) {
+    Wire.beginTransmission(address);
+    error = Wire.endTransmission();
+    if (error == 0) {
+      Serial.print("I2C device found at address 0x");
+      if (address<16) Serial.print("0");
+      Serial.println(address,HEX);
+      nDevices++;
+    }
+  }
+  if (nDevices == 0) {
+    Serial.println("No I2C devices found!");
+  } else {
+    Serial.println("I2C scan complete");
+  }
+  
+  mpu.initialize();
+  delay(50);
+  
   mpuConnected = mpu.testConnection();
   if (!mpuConnected) {
     Serial.println("⚠️  MPU6050 connection failed - using simulated sensor data for testing");
+    Serial.println("Check wiring: SDA=GPIO21, SCL=GPIO22, VCC=3.3V, GND=GND");
+    Serial.println("MPU6050 should be at I2C address 0x68");
     webServer.init(storageManager);
     webServer.sendStatus("⚠️ Development Mode: MPU6050 not connected (using simulated data)");
   } else {
-    Serial.println("MPU6050 initialized successfully");
+    Serial.println("✓ MPU6050 initialized successfully");
+    Serial.println("MPU6050 found at I2C address 0x68");
   }
+  
+  // Configure sensor fusion with orientation
+  sensorFusion.setOrientation(config.mpuOrientation);
   
   // Initialize sensor fusion with config
   sensorFusion.init(config.sampleRate);
@@ -78,10 +133,28 @@ void setup() {
     }
   });
   
+  // Set up orientation callback for web interface
+  webServer.setOrientationCallback([&](uint8_t orientation) {
+    sensorFusion.setOrientation(orientation);
+    webServer.sendStatus("✓ MPU6050 orientation updated");
+  });
+  
+  // Set up MPU status callback for web interface
+  webServer.setMPUStatusCallback([&]() {
+    // Test if sensor is currently responding
+    if (!mpuConnected) return false;
+    
+    // Quick test: try to read WHO_AM_I register
+    Wire.beginTransmission(0x68);
+    byte error = Wire.endTransmission();
+    return (error == 0);
+  });
+  
   // Calibrate to current position as level (sends status to web dashboard)
   if (mpuConnected) {
     sensorFusion.calibrate(mpu, [](const String& msg) {
-      webServer.sendStatus(msg);
+      Serial.println(msg);  // Output to Serial
+      webServer.sendStatus(msg);  // Output to Web
     });
   }
   
@@ -90,6 +163,14 @@ void setup() {
   
   // Initialize PWM outputs
   pwmOutputs.init();
+  
+  // Configure ADC pins for battery monitoring
+  analogReadResolution(12); // 12-bit resolution (0-4095)
+  analogSetAttenuation(ADC_11db); // Full range: 0-3.3V
+  pinMode(BATTERY_ADC_PIN_A, INPUT); // GPIO 34
+  pinMode(BATTERY_ADC_PIN_B, INPUT); // GPIO 35
+  pinMode(BATTERY_ADC_PIN_C, INPUT); // GPIO 32
+  Serial.println("Battery monitoring ADC pins configured");
   
   // Send final ready status
   webServer.sendStatus("✓ System ready!");
@@ -105,11 +186,16 @@ void loop() {
   if (currentTime - lastMPUReadTime >= (1000 / SUSPENSION_SAMPLE_RATE_HZ)) {
     float accelX, accelY, accelZ, gyroX, gyroY, gyroZ;
     
-    if (mpuConnected) {
-      // Read real sensor data
-      int16_t ax, ay, az, gx, gy, gz;
-      mpu.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
-      
+    // Always try to read sensor data (to detect reconnection)
+    int16_t ax, ay, az, gx, gy, gz;
+    
+    // Suppress I2C error messages temporarily to avoid flooding serial
+    esp_log_level_set("Wire", ESP_LOG_NONE);
+    mpu.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
+    esp_log_level_set("Wire", ESP_LOG_WARN);
+    
+    // Check if we got valid data (not all zeros which indicates error)
+    if (ax != 0 || ay != 0 || az != 0 || gx != 0 || gy != 0 || gz != 0) {
       // Convert raw values to g's and dps
       accelX = ax / 16384.0f;
       accelY = ay / 16384.0f;
@@ -117,15 +203,26 @@ void loop() {
       gyroX = gx / 131.0f;
       gyroY = gy / 131.0f;
       gyroZ = gz / 131.0f;
+      
+      // Update connection status - sensor is working!
+      if (!mpuConnected) {
+        mpuConnected = true;
+        Serial.println("✓ MPU6050 now responding - sensor online");
+      }
     } else {
-      // Use simulated sensor data for testing
-      float t = currentTime / 1000.0f;
-      accelX = 0.05f * sin(t * 0.5f);  // Gentle roll motion
-      accelY = 0.03f * sin(t * 0.7f);  // Gentle pitch motion
-      accelZ = 1.0f + 0.1f * sin(t * 1.2f);  // Gravity + small vertical variation
-      gyroX = 2.0f * cos(t * 0.5f);
-      gyroY = 1.5f * cos(t * 0.7f);
-      gyroZ = 0.5f * sin(t * 0.3f);
+      // I2C error - use neutral values for safety
+      accelX = 0.0f;
+      accelY = 0.0f;
+      accelZ = 1.0f;  // Gravity
+      gyroX = 0.0f;
+      gyroY = 0.0f;
+      gyroZ = 0.0f;
+      
+      // Mark sensor as disconnected
+      if (mpuConnected) {
+        mpuConnected = false;
+        Serial.println("⚠️ MPU6050 stopped responding");
+      }
     }
     
     // Update sensor fusion
@@ -139,6 +236,7 @@ void loop() {
     // Get current orientation and acceleration from sensor fusion
     float roll = sensorFusion.getRoll();
     float pitch = sensorFusion.getPitch();
+    float yaw = sensorFusion.getYaw();
     float verticalAccel = sensorFusion.getVerticalAcceleration();
     
     // Update suspension state
@@ -150,13 +248,43 @@ void loop() {
     float rl = suspensionSimulator.getRearLeftOutput();
     float rr = suspensionSimulator.getRearRightOutput();
     
-    // Write PWM outputs
-    pwmOutputs.setChannel(0, fl);
-    pwmOutputs.setChannel(1, fr);
-    pwmOutputs.setChannel(2, rl);
-    pwmOutputs.setChannel(3, rr);
+    // Get servo calibration settings
+    ServoConfig servoConfig = storageManager.getServoConfig();
+    
+    // Write PWM outputs with calibration applied
+    pwmOutputs.setChannel(0, fl, servoConfig.frontLeft);
+    pwmOutputs.setChannel(1, fr, servoConfig.frontRight);
+    pwmOutputs.setChannel(2, rl, servoConfig.rearLeft);
+    pwmOutputs.setChannel(3, rr, servoConfig.rearRight);
+    
+    // Broadcast sensor data to web clients (every 500ms = 2Hz)
+    static unsigned long lastBroadcast = 0;
+    if (currentTime - lastBroadcast >= 500) {
+      if (mpuConnected) {
+        webServer.sendSensorData(roll, pitch, yaw, verticalAccel);
+      } else {
+        // Send NaN values when sensor offline - dashboard will display '--'
+        webServer.sendSensorData(NAN, NAN, NAN, NAN);
+      }
+      lastBroadcast = currentTime;
+    }
     
     lastSimulationTime = currentTime;
+  }
+  
+  // Read battery voltages periodically
+  if (currentTime - lastBatteryReadTime >= BATTERY_READ_INTERVAL) {
+    BatteriesConfig batteryConfig = storageManager.getBatteryConfig();
+    
+    // Read voltage for each configured battery
+    batteryVoltages[0] = readBatteryVoltage(batteryConfig.battery1.plugAssignment);
+    batteryVoltages[1] = readBatteryVoltage(batteryConfig.battery2.plugAssignment);
+    batteryVoltages[2] = readBatteryVoltage(batteryConfig.battery3.plugAssignment);
+    
+    // Broadcast battery voltages to web clients
+    webServer.sendBatteryData(batteryVoltages[0], batteryVoltages[1], batteryVoltages[2]);
+    
+    lastBatteryReadTime = currentTime;
   }
   
   yield();

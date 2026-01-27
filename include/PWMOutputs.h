@@ -41,6 +41,27 @@ public:
     ledcWrite(channel, (uint8_t)pwmValue);
   }
   
+  void setChannel(uint8_t channel, float angle, const ServoCalibration& cal) {
+    if (channel >= 4) return;
+    
+    // 1. Apply trim offset
+    angle += cal.trim;
+    
+    // 2. Apply per-servo limits (final authority on safe travel)
+    angle = constrain(angle, (float)cal.minLimit, (float)cal.maxLimit);
+    
+    // 3. Apply reverse if needed
+    if (cal.reversed) {
+      angle = 180.0f - angle;
+    }
+    
+    // 4. Convert to PWM and send
+    float pwmValue = 51.0f + (angle / 180.0f) * 51.0f;
+    pwmValue = constrain(pwmValue, 51.0f, 102.0f);
+    
+    ledcWrite(channel, (uint8_t)pwmValue);
+  }
+  
   void setChannelMicroseconds(uint8_t channel, uint16_t microseconds) {
     if (channel >= 4) return;
     
