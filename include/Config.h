@@ -45,8 +45,8 @@
 #define DEFAULT_BATTERY_SHOW_DASHBOARD false
 
 // WiFi configuration - Home network (STA mode)
-#define HOME_WIFI_SSID "WIFI_SSID"  // Change this to your WiFi name
-#define HOME_WIFI_PASSWORD "WIFI_PASSWORD"  // Change this to your WiFi password
+#define HOME_WIFI_SSID "CAMELOT"  // Change this to your WiFi name
+#define HOME_WIFI_PASSWORD "bluedaisy347"  // Change this to your WiFi password
 #define WIFI_CONNECT_TIMEOUT 30000  // 30 seconds timeout
 
 // WiFi configuration - Access Point mode (fallback)

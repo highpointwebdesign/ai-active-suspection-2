@@ -143,27 +143,9 @@ private:
       request->send(200, "text/html", getLightsPage());
     });
     
-    // Serve configuration page (chunked for large content)
+    // Serve configuration page
     server.on("/configuration.html", HTTP_GET, [this](AsyncWebServerRequest *request) {
-      AsyncWebServerResponse *response = request->beginChunkedResponse("text/html", [this](uint8_t *buffer, size_t maxLen, size_t index) -> size_t {
-        String html = getConfigurationPage();
-        
-        // Check if we're done sending
-        if (index >= html.length()) {
-          return 0; // Done
-        }
-        
-        // Calculate how much to send in this chunk
-        size_t toSend = html.length() - index;
-        if (toSend > maxLen) {
-          toSend = maxLen;
-        }
-        
-        // Copy chunk to buffer
-        memcpy(buffer, html.c_str() + index, toSend);
-        return toSend;
-      });
-      request->send(response);
+      request->send(200, "text/html", getConfigurationPage());
     });
     
     // API endpoint for health check
@@ -550,11 +532,58 @@ private:
                         if (data.voltages && Array.isArray(data.voltages)) {
                             data.voltages.forEach((voltage, index) => {
                                 const gauge = document.getElementById('battery' + index);
-                                if (gauge) {
-                                    if (voltage > 0) {
-                                        gauge.textContent = voltage.toFixed(2) + 'V';
+                                const icon = document.getElementById('battery' + index + '-icon');
+                                const fill = document.getElementById('battery' + index + '-fill');
+                                
+                                if (gauge && voltage > 0) {
+                                    // Get cell count for this battery
+                                    const cellCount = batteryConfigs[index]?.cellCount || 3;
+                                    const voltagePerCell = voltage / cellCount;
+                                    
+                                    // Determine color based on voltage per cell (LiPo assumption)
+                                    let color, fillPercent;
+                                    
+                                    if (voltagePerCell > 3.8) {
+                                        // GREEN - Good to go (>3.8V per cell)
+                                        color = '#28a745';
+                                        fillPercent = Math.min(100, ((voltagePerCell - 3.0) / 1.2) * 100);
+                                    } else if (voltagePerCell >= 3.4) {
+                                        // YELLOW/ORANGE - Caution (3.4V - 3.8V per cell)
+                                        color = '#ffc107';
+                                        fillPercent = ((voltagePerCell - 3.0) / 1.2) * 100;
                                     } else {
-                                        gauge.textContent = '--';
+                                        // RED - Critical (<3.4V per cell)
+                                        color = '#dc3545';
+                                        fillPercent = ((voltagePerCell - 3.0) / 1.2) * 100;
+                                    }
+                                    
+                                    // Update voltage display
+                                    gauge.textContent = voltage.toFixed(2) + 'V';
+                                    gauge.style.color = color;
+                                    
+                                    // Update battery icon
+                                    if (fill) {
+                                        fill.style.width = Math.max(0, Math.min(100, fillPercent)) + '%';
+                                        fill.style.backgroundColor = color;
+                                    }
+                                    
+                                    // Blink red if critical (<3.2V per cell)
+                                    if (icon) {
+                                        if (voltagePerCell < 3.2) {
+                                            icon.classList.add('battery-critical');
+                                            icon.style.borderColor = color;
+                                        } else {
+                                            icon.classList.remove('battery-critical');
+                                            icon.style.borderColor = '#333';
+                                        }
+                                    }
+                                } else if (gauge) {
+                                    gauge.textContent = '--';
+                                    gauge.style.color = '#667eea';
+                                    if (fill) fill.style.width = '0%';
+                                    if (icon) {
+                                        icon.classList.remove('battery-critical');
+                                        icon.style.borderColor = '#333';
                                     }
                                 }
                             });
@@ -748,6 +777,44 @@ private:
             color: #667eea;
         }
         
+        /* Battery Icon Styles */
+        .battery-icon {
+            width: 40px;
+            height: 20px;
+            border: 2px solid #333;
+            border-radius: 3px;
+            position: relative;
+            margin: 10px auto 0;
+            display: inline-block;
+        }
+        
+        .battery-icon::after {
+            content: '';
+            position: absolute;
+            right: -4px;
+            top: 6px;
+            width: 3px;
+            height: 8px;
+            background: #333;
+            border-radius: 0 2px 2px 0;
+        }
+        
+        .battery-fill {
+            height: 100%;
+            background: #28a745;
+            border-radius: 1px;
+            transition: width 0.3s ease, background-color 0.3s ease;
+        }
+        
+        .battery-critical {
+            animation: blink-red 1s infinite;
+        }
+        
+        @keyframes blink-red {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+        
         .status-indicator {
             background: #f8f9fa;
             padding: 15px;
@@ -848,12 +915,16 @@ private:
         // Battery gauge colors
         const batteryColors = ['#28a745', '#ffc107', '#dc3545'];
         
+        // Store battery configurations globally
+        let batteryConfigs = [];
+        
         // Load battery configuration and create gauges
         async function loadBatteryConfig() {
             try {
                 const response = await fetch('/api/battery-config');
                 if (response.ok) {
                     const config = await response.json();
+                    batteryConfigs = config.batteries; // Store for later use
                     const container = document.getElementById('batteryGauges');
                     container.innerHTML = ''; // Clear existing
                     
@@ -866,7 +937,10 @@ private:
                             gauge.style.borderLeftColor = color;
                             gauge.innerHTML = `
                                 <div class="gauge-title">${battery.name.toUpperCase()}</div>
-                                <div class="gauge-value" style="color: ${color};" id="battery${index}">--</div>
+                                <div class="gauge-value" id="battery${index}">--</div>
+                                <div class="battery-icon" id="battery${index}-icon">
+                                    <div class="battery-fill" id="battery${index}-fill" style="width: 0%;"></div>
+                                </div>
                             `;
                             container.appendChild(gauge);
                         }
@@ -1755,9 +1829,11 @@ private:
         }
         
         .section-chevron {
-            font-size: 16px;
+            font-size: 20px;
+            font-weight: bold;
             color: #667eea;
-            transition: transform 0.3s ease;
+            transition: color 0.2s ease;
+            cursor: pointer;
         }
         
         .section-content {
@@ -1768,10 +1844,6 @@ private:
         
         .section-content.collapsed {
             max-height: 0;
-        }
-        
-        .section-chevron.collapsed {
-            transform: rotate(-90deg);
         }
     </style>
 </head>
@@ -1784,9 +1856,9 @@ private:
         <div class="control-group" style="margin-bottom: 25px; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
             <div class="section-header" onclick="toggleSection('batterySection')">
                 <h2>🔋 Battery Configuration</h2>
-                <span class="section-chevron" id="batterySection-chevron">▼</span>
+                <span class="section-chevron collapsed" id="batterySection-chevron">+</span>
             </div>
-            <div class="section-content" id="batterySection-content">
+            <div class="section-content collapsed" id="batterySection-content">
             
             <!-- Battery 1 -->
             <div style="margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 6px;">
@@ -1919,9 +1991,9 @@ private:
         <div class="control-group" style="margin-bottom: 25px; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
             <div class="section-header" onclick="toggleSection('mpuSection')">
                 <h2>🧭 MPU6050 Sensor Orientation</h2>
-                <span class="section-chevron" id="mpuSection-chevron">▼</span>
+                <span class="section-chevron collapsed" id="mpuSection-chevron">+</span>
             </div>
-            <div class="section-content" id="mpuSection-content">
+            <div class="section-content collapsed" id="mpuSection-content">
             <div class="control-row">
                 <div class="control-label">
                     <span>Physical Mounting</span>
@@ -1944,7 +2016,7 @@ private:
         <div class="control-group" style="margin-bottom: 25px; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
             <div class="section-header" onclick="toggleSection('servoSection')">
                 <h2>🎯 Servo Calibration</h2>
-                <span class="section-chevron collapsed" id="servoSection-chevron">▼</span>
+                <span class="section-chevron collapsed" id="servoSection-chevron">+</span>
             </div>
             <div class="section-content collapsed" id="servoSection-content">
             <div class="servo-grid">
@@ -2384,6 +2456,9 @@ private:
             
             content.classList.toggle('collapsed');
             chevron.classList.toggle('collapsed');
+            
+            // Change between + (collapsed) and - (expanded)
+            chevron.textContent = chevron.classList.contains('collapsed') ? '+' : '−';
         }
         
         async function saveBatteryConfig(batteryNum, param, value) {
