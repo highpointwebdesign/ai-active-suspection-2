@@ -2,7 +2,8 @@ import { useState, useRef, useEffect, memo, useCallback } from 'react';
 import noUiSlider from 'nouislider';
 import 'nouislider/dist/nouislider.css';
 import './ServoConfig.css';
-import { updateServoParam } from '../api/esp32';
+import { updateServoParam, calibrateMPU, getSensorData } from '../api/esp32';
+import BubbleLevel from './BubbleLevel';
 
 const ServoColumn = memo(({ title, servoKey, servo, onReverse, onReset }) => {
   const sliderRef = useRef(null);
@@ -175,10 +176,144 @@ function ServoConfig({ config, onUpdateConfig }) {
   };
 
   const [controlMode, setControlMode] = useState('individual'); // 'all' or 'individual'
+  const [calibrating, setCalibrating] = useState(false);
+  const [autoLeveling, setAutoLeveling] = useState(false);
+  const [levelingStatus, setLevelingStatus] = useState('');
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertMessage, setAlertMessage] = useState('');
+
+  const handleSetLevel = async () => {
+    setCalibrating(true);
+    try {
+      await calibrateMPU();
+      setTimeout(() => setCalibrating(false), 2000);
+    } catch (error) {
+      console.error('Calibration failed:', error);
+      setCalibrating(false);
+    }
+  };
+
+  const handleAutoLevel = async () => {
+    setAutoLeveling(true);
+    setLevelingStatus('Reading sensors...');
+    
+    const MAX_ADJUSTMENT = 20;
+    const LEVEL_TOLERANCE = 1.5; // degrees
+    const ADJUSTMENT_STEP = 2; // degrees per iteration
+    const MAX_ITERATIONS = 15;
+    
+    try {
+      let iteration = 0;
+      
+      while (iteration < MAX_ITERATIONS) {
+        // Read current orientation
+        const sensorData = await getSensorData();
+        const roll = sensorData.roll || 0;
+        const pitch = sensorData.pitch || 0;
+        
+        // Check if level
+        if (Math.abs(roll) < LEVEL_TOLERANCE && Math.abs(pitch) < LEVEL_TOLERANCE) {
+          setLevelingStatus('Level achieved!');
+          setTimeout(() => {
+            setAutoLeveling(false);
+            setLevelingStatus('');
+          }, 2000);
+          return;
+        }
+        
+        setLevelingStatus(`Adjusting... (${iteration + 1}/${MAX_ITERATIONS})`);
+        
+        // Calculate adjustments based on tilt
+        // Roll: positive = tilting right, need to raise left side
+        // Pitch: positive = nose up, need to lower front
+        
+        const rollAdjustment = Math.min(Math.abs(roll), ADJUSTMENT_STEP) * Math.sign(roll);
+        const pitchAdjustment = Math.min(Math.abs(pitch), ADJUSTMENT_STEP) * Math.sign(pitch);
+        
+        // Apply adjustments to each servo's trim
+        const adjustments = {
+          frontLeft: rollAdjustment - pitchAdjustment,
+          frontRight: -rollAdjustment - pitchAdjustment,
+          rearLeft: rollAdjustment + pitchAdjustment,
+          rearRight: -rollAdjustment + pitchAdjustment
+        };
+        
+        // Apply adjustments with limits
+        for (const [servoKey, adjustment] of Object.entries(adjustments)) {
+          const currentTrim = servos[servoKey].trim;
+          const newTrim = Math.max(-MAX_ADJUSTMENT, Math.min(MAX_ADJUSTMENT, currentTrim + adjustment));
+          
+          if (newTrim !== currentTrim) {
+            await updateServoParam(servoKey, 'trim', Math.round(newTrim));
+            
+            // Update local state
+            setServos(prev => ({
+              ...prev,
+              [servoKey]: { ...prev[servoKey], trim: Math.round(newTrim) }
+            }));
+          }
+        }
+        
+        // Wait for servos to move and settle
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        iteration++;
+      }
+      
+      // Max iterations reached
+      setLevelingStatus('Max iterations reached');
+      setAlertMessage('Auto level failed - the vehicle is too unlevel for auto level to correct');
+      setShowAlert(true);
+      setTimeout(() => {
+        setAutoLeveling(false);
+        setLevelingStatus('');
+      }, 3000);
+      
+    } catch (error) {
+      console.error('Auto-leveling failed:', error);
+      setLevelingStatus('Error occurred');
+      setTimeout(() => {
+        setAutoLeveling(false);
+        setLevelingStatus('');
+      }, 2000);
+    }
+  };
 
   return (
     <div className="servo-config-page">
-      <h2>🎯 Servo Calibration</h2>
+      {/* Alert Message */}
+      {showAlert && (
+        <div className="alert-banner">
+          <div className="alert-content">
+            {/* <span className="alert-icon">⚠️</span> */}
+            <span className="alert-text">{alertMessage}</span>
+            <button className="alert-close" onClick={() => setShowAlert(false)}>✕</button>
+          </div>
+        </div>
+      )}
+
+      <div className="page-header">
+        <h2>Servo Calibration</h2>
+        <div className="header-buttons">
+          <button 
+            className={`set-level-btn ${calibrating ? 'calibrating' : ''}`}
+            onClick={handleSetLevel}
+            disabled={calibrating || autoLeveling}
+          >
+            {calibrating ? 'Calibrating...' : 'Set Level'}
+          </button>
+          <button 
+            className={`auto-level-btn ${autoLeveling ? 'active' : ''}`}
+            onClick={handleAutoLevel}
+            disabled={calibrating || autoLeveling}
+          >
+            {autoLeveling ? levelingStatus : 'Auto Level'}
+          </button>
+        </div>
+      </div>
+
+      {/* Bubble Level Indicator */}
+      <BubbleLevel />
 
       {/* Mode Toggle */}
       <div className="mode-toggle">
@@ -231,9 +366,9 @@ function ServoConfig({ config, onUpdateConfig }) {
         • <span style={{color: '#764ba2', fontWeight: 'bold'}}>Purple Handle (MAX)</span> - Maximum servo angle limit<br />
         • <span style={{color: '#16c79a', fontWeight: 'bold'}}>Teal Handle (TRIM)</span> - Center position adjustment<br />
         • <span style={{color: '#4a90e2', fontWeight: 'bold'}}>Blue Handle (MIN)</span> - Minimum servo angle limit<br />        
-        • Drag handles smoothly along the slider to adjust positions<br />
-        • Reverse - Flips servo rotation<br />
-        • Changes are saved automatically to the ESP32
+        • Drag the appropriate handle to adjust the servo's position and mechanical constraints<br />
+        • Reverse - Changes the rotation of the output shaft<br />
+        • Changes are saved automatically
       </div>
     </div>
   );

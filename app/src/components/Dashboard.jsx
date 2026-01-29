@@ -25,13 +25,13 @@ function Dashboard({ sensorData, batteryData, config, onCalibrate, rolloverDetec
         </div>
       )}
       <div className="dashboard-header">
-        <h2>🏎️ Live Telemetry</h2>
+        <h2>Live Telemetry</h2>
         <button 
           className={`set-level-btn ${calibrating ? 'calibrating' : ''}`}
           onClick={handleSetLevel}
           disabled={calibrating}
         >
-          {calibrating ? '⏳ Calibrating...' : '📐 Set Level'}
+          {calibrating ? 'Calibrating...' : 'Set Level'}
         </button>
       </div>
 
@@ -56,7 +56,7 @@ function Dashboard({ sensorData, batteryData, config, onCalibrate, rolloverDetec
 
       {batteryData && batteryData.length > 0 && (
         <div className="battery-section">
-          <h3>🔋 Battery Status</h3>
+          <h3>Battery Status</h3>
           <div className="battery-grid">
             {batteryData.map((voltage, index) => (
               <BatteryDisplay
