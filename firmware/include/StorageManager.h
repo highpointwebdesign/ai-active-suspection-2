@@ -25,7 +25,10 @@ public:
     config.damping = DEFAULT_DAMPING;
     config.frontRearBalance = DEFAULT_FRONT_REAR_BALANCE;
     config.stiffness = DEFAULT_STIFFNESS;
-    config.sampleRate = SUSPENSION_SAMPLE_RATE_HZ;      config.mpuOrientation = DEFAULT_MPU6050_ORIENTATION;  }
+    config.sampleRate = SUSPENSION_SAMPLE_RATE_HZ;
+    config.mpuOrientation = DEFAULT_MPU6050_ORIENTATION;
+    config.fpvAutoMode = DEFAULT_FPV_AUTO_MODE;
+  }
   
   void loadServoDefaults() {
     servoConfig.frontLeft = {DEFAULT_SERVO_TRIM, DEFAULT_SERVO_MIN, DEFAULT_SERVO_MAX, DEFAULT_SERVO_REVERSED};
@@ -81,6 +84,7 @@ public:
     config.stiffness = doc["stiffness"] | DEFAULT_STIFFNESS;
     config.sampleRate = doc["sampleRate"] | SUSPENSION_SAMPLE_RATE_HZ;
     config.mpuOrientation = doc["mpuOrientation"] | DEFAULT_MPU6050_ORIENTATION;
+    config.fpvAutoMode = doc["fpvAutoMode"] | DEFAULT_FPV_AUTO_MODE;
     
     // Load servo calibration if available
     if (doc.containsKey("servos")) {
@@ -148,6 +152,7 @@ public:
     doc["stiffness"] = config.stiffness;
     doc["sampleRate"] = config.sampleRate;
     doc["mpuOrientation"] = config.mpuOrientation;
+    doc["fpvAutoMode"] = config.fpvAutoMode;
     
     // Save servo calibration
     JsonObject servos = doc.createNestedObject("servos");
@@ -225,7 +230,7 @@ public:
     else if (key == "damping") config.damping = value;
     else if (key == "frontRearBalance") config.frontRearBalance = value;
     else if (key == "stiffness") config.stiffness = value;
-    
+    else if (key == "fpvAutoMode") config.fpvAutoMode = (value != 0.0f);
     saveConfig();
   }
   

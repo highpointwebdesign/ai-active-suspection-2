@@ -246,45 +246,50 @@ private:
           serializeJson(doc, Serial);
           Serial.println();
           
-          if (doc.containsKey("reactionSpeed")) {
-            float val = doc["reactionSpeed"];
-            Serial.printf("Updating reactionSpeed to: %.2f\n", val);
-            storageManager->updateParameter("reactionSpeed", val);
-          }
-          if (doc.containsKey("rideHeightOffset")) {
-            float val = doc["rideHeightOffset"];
-            Serial.printf("Updating rideHeightOffset to: %.0f\n", val);
-            storageManager->updateParameter("rideHeightOffset", val);
-          }
-          if (doc.containsKey("rangeLimit")) {
-            float val = doc["rangeLimit"];
-            Serial.printf("Updating rangeLimit to: %.0f\n", val);
-            storageManager->updateParameter("rangeLimit", val);
-          }
-          if (doc.containsKey("damping")) {
-            float val = doc["damping"];
-            Serial.printf("Updating damping to: %.2f\n", val);
-            storageManager->updateParameter("damping", val);
-          }
-          if (doc.containsKey("frontRearBalance")) {
-            float val = doc["frontRearBalance"];
-            Serial.printf("Updating frontRearBalance to: %.2f\n", val);
-            storageManager->updateParameter("frontRearBalance", val);
-          }
-          if (doc.containsKey("stiffness")) {
-            float val = doc["stiffness"];
-            Serial.printf("Updating stiffness to: %.2f\n", val);
-            storageManager->updateParameter("stiffness", val);
-          }
-          if (doc.containsKey("mpuOrientation")) {
-            uint8_t orientation = doc["mpuOrientation"];
-            Serial.printf("Updating mpuOrientation to: %d\n", orientation);
-            storageManager->updateParameter("mpuOrientation", orientation);
-            // Notify sensor fusion of orientation change
-            if (orientationCallback) {
-              orientationCallback(orientation);
-            }
-          }
+                    if (doc.containsKey("reactionSpeed")) {
+                        float val = doc["reactionSpeed"];
+                        Serial.printf("Updating reactionSpeed to: %.2f\n", val);
+                        storageManager->updateParameter("reactionSpeed", val);
+                    }
+                    if (doc.containsKey("rideHeightOffset")) {
+                        float val = doc["rideHeightOffset"];
+                        Serial.printf("Updating rideHeightOffset to: %.0f\n", val);
+                        storageManager->updateParameter("rideHeightOffset", val);
+                    }
+                    if (doc.containsKey("rangeLimit")) {
+                        float val = doc["rangeLimit"];
+                        Serial.printf("Updating rangeLimit to: %.0f\n", val);
+                        storageManager->updateParameter("rangeLimit", val);
+                    }
+                    if (doc.containsKey("damping")) {
+                        float val = doc["damping"];
+                        Serial.printf("Updating damping to: %.2f\n", val);
+                        storageManager->updateParameter("damping", val);
+                    }
+                    if (doc.containsKey("frontRearBalance")) {
+                        float val = doc["frontRearBalance"];
+                        Serial.printf("Updating frontRearBalance to: %.2f\n", val);
+                        storageManager->updateParameter("frontRearBalance", val);
+                    }
+                    if (doc.containsKey("stiffness")) {
+                        float val = doc["stiffness"];
+                        Serial.printf("Updating stiffness to: %.2f\n", val);
+                        storageManager->updateParameter("stiffness", val);
+                    }
+                    if (doc.containsKey("mpuOrientation")) {
+                        uint8_t orientation = doc["mpuOrientation"];
+                        Serial.printf("Updating mpuOrientation to: %d\n", orientation);
+                        storageManager->updateParameter("mpuOrientation", orientation);
+                        // Notify sensor fusion of orientation change
+                        if (orientationCallback) {
+                            orientationCallback(orientation);
+                        }
+                    }
+                    if (doc.containsKey("fpvAutoMode")) {
+                        bool autoMode = doc["fpvAutoMode"];
+                        Serial.printf("Updating fpvAutoMode to: %s\n", autoMode ? "true" : "false");
+                        storageManager->updateParameter("fpvAutoMode", autoMode ? 1.0f : 0.0f);
+                    }
           
           request->send(200, "application/json", "{\"status\":\"success\"}");
         } else {

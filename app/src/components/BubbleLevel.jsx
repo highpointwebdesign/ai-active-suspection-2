@@ -27,8 +27,8 @@ function BubbleLevel() {
     // Initial fetch
     fetchSensorData();
 
-    // Poll every 150ms for smooth updates
-    intervalId = setInterval(fetchSensorData, 150);
+    // Poll every 500ms for smoother updates and reduced backend load
+    intervalId = setInterval(fetchSensorData, 500);
 
     return () => {
       if (intervalId) clearInterval(intervalId);
@@ -48,10 +48,8 @@ function BubbleLevel() {
         {/* Crosshairs */}
         <div className="crosshair horizontal"></div>
         <div className="crosshair vertical"></div>
-        
         {/* Center circle (target zone) */}
         <div className="center-circle"></div>
-        
         {/* The bubble */}
         <div 
           className="bubble"
@@ -60,23 +58,6 @@ function BubbleLevel() {
           }}
         ></div>
       </div>
-      
-      {/* Numerical display */}
-      <div className="level-values">
-        <div className="level-value">
-          <span className="value-label">Roll:</span>
-          <span className={`value-number ${Math.abs(roll) < 2 ? 'good' : ''}`}>
-            {roll.toFixed(1)}°
-          </span>
-        </div>
-        <div className="level-value">
-          <span className="value-label">Pitch:</span>
-          <span className={`value-number ${Math.abs(pitch) < 2 ? 'good' : ''}`}>
-            {pitch.toFixed(1)}°
-          </span>
-        </div>
-      </div>
-      
       {isLevel && (
         <div className="level-indicator">✓ LEVEL</div>
       )}

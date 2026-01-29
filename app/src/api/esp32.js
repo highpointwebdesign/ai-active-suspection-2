@@ -1,3 +1,13 @@
+// Update FPV auto mode
+export const setFpvAutoMode = async (autoMode) => {
+  const response = await fetch(apiUrl('/api/config'), {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ fpvAutoMode: autoMode })
+  });
+  if (!response.ok) throw new Error('Failed to update FPV auto mode');
+  return response.json();
+};
 // ESP32 API Client
 // Default to ESP32 Access Point IP
 const DEFAULT_ESP32_IP = '192.168.4.1';

@@ -23,11 +23,12 @@
 #define DEFAULT_DAMPING 0.8f
 #define DEFAULT_FRONT_REAR_BALANCE 0.5f
 #define DEFAULT_STIFFNESS 1.0f
+#define DEFAULT_FPV_AUTO_MODE false // FPV auto mode default
 
 // Default servo calibration parameters
 #define DEFAULT_SERVO_TRIM 0         // No trim offset (degrees)
-#define DEFAULT_SERVO_MIN 30         // Minimum angle (degrees)
-#define DEFAULT_SERVO_MAX 150        // Maximum angle (degrees)
+#define DEFAULT_SERVO_MIN 15         // Minimum angle (degrees)
+#define DEFAULT_SERVO_MAX 165        // Maximum angle (degrees)
 #define DEFAULT_SERVO_REVERSED false // Standard rotation direction
 
 // Battery monitoring configuration
@@ -81,13 +82,14 @@ struct SuspensionConfig {
   float stiffness;
   uint16_t sampleRate;
   uint8_t mpuOrientation;  // MPU6050 mounting orientation
+  bool fpvAutoMode;        // FPV auto mode persistent setting
 };
 
 // Per-servo calibration settings
 struct ServoCalibration {
   int8_t trim;        // Offset in degrees (-45 to +45)
-  uint8_t minLimit;   // Minimum angle (30-90)
-  uint8_t maxLimit;   // Maximum angle (90-150)
+  uint8_t minLimit;   // Minimum angle (0-90 degrees)
+  uint8_t maxLimit;   // Maximum angle (90-180 degrees)
   bool reversed;      // Reverse direction flag
 };
 

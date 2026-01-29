@@ -5,18 +5,26 @@
   margin: 0 auto;
 }
 
-.page-header {
+
+.servo-config-header {
+  margin-bottom: 1rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1rem;
+  flex-wrap: wrap;
   gap: 1rem;
 }
 
-.servo-config-page h2 {
+.servo-config-header h2 {
   font-size: 2rem;
   color: #16c79a;
   margin: 0;
+}
+
+@media (max-width: 768px) {
+  .servo-config-header h2 {
+    font-size: 1.5rem;
+  }
 }
 
 .header-buttons {

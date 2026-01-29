@@ -5,6 +5,7 @@ import './Dashboard.css';
 
 function Dashboard({ sensorData, batteryData, config, onCalibrate, rolloverDetected }) {
   const [calibrating, setCalibrating] = useState(false);
+  const [resettingGimbal, setResettingGimbal] = useState(false);
 
   const handleSetLevel = async () => {
     setCalibrating(true);
@@ -17,6 +18,19 @@ function Dashboard({ sensorData, batteryData, config, onCalibrate, rolloverDetec
     }
   };
 
+  const handleGimbalReset = async () => {
+    setResettingGimbal(true);
+    try {
+      // TODO: Add API call to reset gimbal
+      console.log('Resetting gimbal...');
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      setResettingGimbal(false);
+    } catch (error) {
+      console.error('Gimbal reset failed:', error);
+      setResettingGimbal(false);
+    }
+  };
+
   return (
     <div className="dashboard">
       {rolloverDetected && (
@@ -26,13 +40,22 @@ function Dashboard({ sensorData, batteryData, config, onCalibrate, rolloverDetec
       )}
       <div className="dashboard-header">
         <h2>Live Telemetry</h2>
-        <button 
-          className={`set-level-btn ${calibrating ? 'calibrating' : ''}`}
-          onClick={handleSetLevel}
-          disabled={calibrating}
-        >
-          {calibrating ? 'Calibrating...' : 'Set Level'}
-        </button>
+        <div className="header-buttons">
+          <button 
+            className={`set-level-btn ${calibrating ? 'calibrating' : ''}`}
+            onClick={handleSetLevel}
+            disabled={calibrating}
+          >
+            {calibrating ? 'Calibrating...' : 'Set Level'}
+          </button>
+          <button 
+            className={`set-level-btn ${resettingGimbal ? 'calibrating' : ''}`}
+            onClick={handleGimbalReset}
+            disabled={resettingGimbal}
+          >
+            {resettingGimbal ? 'Resetting...' : 'Reset Gimbal'}
+          </button>
+        </div>
       </div>
 
       <div className="sensor-grid">

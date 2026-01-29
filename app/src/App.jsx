@@ -4,6 +4,7 @@ import Settings from './components/Settings';
 import Dashboard from './components/Dashboard';
 import Tuning from './components/Tuning';
 import Lights from './components/Lights';
+import FPV from './components/FPV';
 import ServoConfig from './components/ServoConfig';
 import BottomNav from './components/BottomNav';
 import './App.css';
@@ -128,6 +129,7 @@ function App() {
               />
             )}
             {currentPage === 'lights' && <Lights />}
+            {currentPage === 'fpv' && <FPV />}
             {currentPage === 'servo' && (
               <ServoConfig 
                 config={config}

@@ -175,7 +175,7 @@ function ServoConfig({ config, onUpdateConfig }) {
     });
   };
 
-  const [controlMode, setControlMode] = useState('individual'); // 'all' or 'individual'
+  // Only individual mode is supported now
   const [calibrating, setCalibrating] = useState(false);
   const [autoLeveling, setAutoLeveling] = useState(false);
   const [levelingStatus, setLevelingStatus] = useState('');
@@ -195,14 +195,93 @@ function ServoConfig({ config, onUpdateConfig }) {
 
   const handleAutoLevel = async () => {
     setAutoLeveling(true);
-    setLevelingStatus('Reading sensors...');
+    setLevelingStatus('Detecting servo directions...');
     
     const MAX_ADJUSTMENT = 20;
     const LEVEL_TOLERANCE = 1.5; // degrees
     const ADJUSTMENT_STEP = 2; // degrees per iteration
     const MAX_ITERATIONS = 15;
+    const TEST_MOVEMENT = 10; // degrees for reverse detection
     
     try {
+      // Step 1: Auto-detect reverse settings
+      const servoTests = ['frontLeft', 'frontRight', 'rearLeft', 'rearRight'];
+      const detectedReversed = {};
+      
+      for (const servoKey of servoTests) {
+        setLevelingStatus(`Testing ${servoKey}...`);
+        
+        // Record initial position and orientation
+        const initialTrim = servos[servoKey].trim;
+        const initialSensor = await getSensorData();
+        await new Promise(resolve => setTimeout(resolve, 200));
+        
+        // Move servo up (positive direction)
+        await updateServoParam(servoKey, 'trim', initialTrim + TEST_MOVEMENT);
+        setServos(prev => ({
+          ...prev,
+          [servoKey]: { ...prev[servoKey], trim: initialTrim + TEST_MOVEMENT }
+        }));
+        
+        // Wait for movement to settle
+        await new Promise(resolve => setTimeout(resolve, 800));
+        
+        // Read new orientation
+        const testSensor = await getSensorData();
+        
+        // Calculate which corner should have moved up
+        // Positive trim should raise that corner
+        let expectedChange = 0;
+        let actualChange = 0;
+        
+        if (servoKey === 'frontLeft') {
+          // FL up should: increase roll (left side up), decrease pitch (nose down)
+          expectedChange = 1; // Should go positive
+          actualChange = (testSensor.roll - initialSensor.roll) - (testSensor.pitch - initialSensor.pitch);
+        } else if (servoKey === 'frontRight') {
+          // FR up should: decrease roll (right side up), decrease pitch (nose down)
+          expectedChange = -1; // Should go negative
+          actualChange = -(testSensor.roll - initialSensor.roll) - (testSensor.pitch - initialSensor.pitch);
+        } else if (servoKey === 'rearLeft') {
+          // RL up should: increase roll (left side up), increase pitch (nose up)
+          expectedChange = 1; // Should go positive
+          actualChange = (testSensor.roll - initialSensor.roll) + (testSensor.pitch - initialSensor.pitch);
+        } else if (servoKey === 'rearRight') {
+          // RR up should: decrease roll (right side up), increase pitch (nose up)
+          expectedChange = -1; // Should go negative
+          actualChange = -(testSensor.roll - initialSensor.roll) + (testSensor.pitch - initialSensor.pitch);
+        }
+        
+        // If actual movement is opposite to expected, servo is reversed
+        const isReversed = (expectedChange * actualChange) < -1; // Threshold to account for noise
+        detectedReversed[servoKey] = isReversed;
+        
+        // Return to original position
+        await updateServoParam(servoKey, 'trim', initialTrim);
+        setServos(prev => ({
+          ...prev,
+          [servoKey]: { ...prev[servoKey], trim: initialTrim }
+        }));
+        
+        await new Promise(resolve => setTimeout(resolve, 300));
+      }
+      
+      // Apply detected reverse settings
+      setLevelingStatus('Applying reverse settings...');
+      for (const [servoKey, isReversed] of Object.entries(detectedReversed)) {
+        if (servos[servoKey].reversed !== isReversed) {
+          await updateServoParam(servoKey, 'reversed', isReversed);
+          setServos(prev => ({
+            ...prev,
+            [servoKey]: { ...prev[servoKey], reversed: isReversed }
+          }));
+        }
+      }
+      
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // Step 2: Proceed with auto-leveling
+      setLevelingStatus('Starting auto-level...');
       let iteration = 0;
       
       while (iteration < MAX_ITERATIONS) {
@@ -292,7 +371,7 @@ function ServoConfig({ config, onUpdateConfig }) {
         </div>
       )}
 
-      <div className="page-header">
+      <div className="servo-config-header">
         <h2>Servo Calibration</h2>
         <div className="header-buttons">
           <button 
@@ -315,60 +394,26 @@ function ServoConfig({ config, onUpdateConfig }) {
       {/* Bubble Level Indicator */}
       <BubbleLevel />
 
-      {/* Mode Toggle */}
-      <div className="mode-toggle">
-        <button 
-          className={`mode-btn ${controlMode === 'all' ? 'active' : ''}`}
-          onClick={() => setControlMode('all')}
-        >
-          All Servos
-        </button>
-        <button 
-          className={`mode-btn ${controlMode === 'individual' ? 'active' : ''}`}
-          onClick={() => setControlMode('individual')}
-        >
-          Individual
-        </button>
+      {/* Individual Mode - Four Sliders Only */}
+      <div className="servo-grid">
+        <ServoColumn key="frontLeft" title="Front Left" servoKey="frontLeft" servo={servos.frontLeft} onReverse={handleReverse} onReset={resetServo} />
+        <ServoColumn key="frontRight" title="Front Right" servoKey="frontRight" servo={servos.frontRight} onReverse={handleReverse} onReset={resetServo} />
+        <ServoColumn key="rearLeft" title="Rear Left" servoKey="rearLeft" servo={servos.rearLeft} onReverse={handleReverse} onReset={resetServo} />
+        <ServoColumn key="rearRight" title="Rear Right" servoKey="rearRight" servo={servos.rearRight} onReverse={handleReverse} onReset={resetServo} />
       </div>
-
-      {/* All Servos Mode - Single Slider */}
-      {controlMode === 'all' && (
-        <div className="all-servos-mode">
-          <ServoColumn 
-            key="allServos" 
-            title="All Servos" 
-            servoKey="allServos" 
-            servo={servos.frontLeft} // Placeholder for now
-            onReverse={() => {}} 
-            onReset={() => {}} 
-          />
-        </div>
-      )}
-
-      {/* Individual Mode - Four Sliders */}
-      {controlMode === 'individual' && (
-        <>
-          <div className="servo-grid">
-            <ServoColumn key="frontLeft" title="Front Left" servoKey="frontLeft" servo={servos.frontLeft} onReverse={handleReverse} onReset={resetServo} />
-            <ServoColumn key="frontRight" title="Front Right" servoKey="frontRight" servo={servos.frontRight} onReverse={handleReverse} onReset={resetServo} />
-            <ServoColumn key="rearLeft" title="Rear Left" servoKey="rearLeft" servo={servos.rearLeft} onReverse={handleReverse} onReset={resetServo} />
-            <ServoColumn key="rearRight" title="Rear Right" servoKey="rearRight" servo={servos.rearRight} onReverse={handleReverse} onReset={resetServo} />
-          </div>
-
-          <button className="btn-reset-all" onClick={resetAll}>
-            Reset All Servos to Defaults
-          </button>
-        </>
-      )}
+      <button className="btn-reset-all" onClick={resetAll}>
+        Reset All Servos to Defaults
+      </button>
 
       <div className="info-box">
         <strong>Calibration Tips:</strong><br />
-        • <span style={{color: '#764ba2', fontWeight: 'bold'}}>Purple Handle (MAX)</span> - Maximum servo angle limit<br />
-        • <span style={{color: '#16c79a', fontWeight: 'bold'}}>Teal Handle (TRIM)</span> - Center position adjustment<br />
-        • <span style={{color: '#4a90e2', fontWeight: 'bold'}}>Blue Handle (MIN)</span> - Minimum servo angle limit<br />        
-        • Drag the appropriate handle to adjust the servo's position and mechanical constraints<br />
-        • Reverse - Changes the rotation of the output shaft<br />
-        • Changes are saved automatically
+        • <span style={{color: '#764ba2', fontWeight: 'bold'}}>Purple Handle (MAX)</span> - Maximum servo angle limit (safety constraint)<br />
+        • <span style={{color: '#16c79a', fontWeight: 'bold'}}>Teal Handle (TRIM)</span> - Static leveling adjustment per corner<br />
+        • <span style={{color: '#4a90e2', fontWeight: 'bold'}}>Blue Handle (MIN)</span> - Minimum servo angle limit (safety constraint)<br />        
+        • This page is for ONE-TIME setup and static leveling<br />
+        • For dynamic ride height during driving, use Suspension Tuning page<br />
+        • Use Auto Level to automatically adjust trims<br />
+        • Changes are saved automatically to the ESP32
       </div>
     </div>
   );

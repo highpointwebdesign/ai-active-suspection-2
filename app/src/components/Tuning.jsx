@@ -4,8 +4,7 @@ import './Tuning.css';
 function Tuning({ config, onUpdateConfig }) {
   const [values, setValues] = useState({
     reactionSpeed: 1.0,
-    rideHeightOffset: 90,
-    rangeLimit: 60,
+    rideHeightOffset: 50,
     damping: 0.8,
     frontRearBalance: 0.5,
     stiffness: 1.0
@@ -18,7 +17,6 @@ function Tuning({ config, onUpdateConfig }) {
       setValues(prev => ({
         reactionSpeed: config.reactionSpeed ?? prev.reactionSpeed,
         rideHeightOffset: config.rideHeightOffset ?? prev.rideHeightOffset,
-        rangeLimit: config.rangeLimit ?? prev.rangeLimit,
         damping: config.damping ?? prev.damping,
         frontRearBalance: config.frontRearBalance ?? prev.frontRearBalance,
         stiffness: config.stiffness ?? prev.stiffness
@@ -44,8 +42,7 @@ function Tuning({ config, onUpdateConfig }) {
     if (window.confirm('Reset all settings to factory defaults?')) {
       const defaults = {
         reactionSpeed: 1.0,
-        rideHeightOffset: 90,
-        rangeLimit: 60,
+        rideHeightOffset: 50,
         damping: 0.8,
         frontRearBalance: 0.5,
         stiffness: 1.0
@@ -61,6 +58,9 @@ function Tuning({ config, onUpdateConfig }) {
   };
 
   const formatValue = (param, value) => {
+    if (param === 'rideHeightOffset') {
+      return value.toFixed(0) + '%';
+    }
     const decimalParams = ['reactionSpeed', 'damping', 'frontRearBalance', 'stiffness'];
     return decimalParams.includes(param) ? value.toFixed(2) : value.toFixed(0);
   };
@@ -77,18 +77,10 @@ function Tuning({ config, onUpdateConfig }) {
     {
       key: 'rideHeightOffset',
       label: 'Ride Height',
-      min: 30,
-      max: 150,
+      min: 0,
+      max: 100,
       step: 1,
-      help: 'Sets the neutral servo position (90° = center). Adjust to change overall vehicle height.'
-    },
-    {
-      key: 'rangeLimit',
-      label: 'Travel Range',
-      min: 10,
-      max: 90,
-      step: 1,
-      help: 'Maximum suspension travel in degrees (±). Limits how far servos can move from center position.'
+      help: 'Sets baseline operating height as percentage of min/max range. 0% = lowest (stability), 100% = highest (clearance). Active suspension adjusts within this range.'
     },
     {
       key: 'damping',
@@ -155,6 +147,8 @@ function Tuning({ config, onUpdateConfig }) {
         <strong>Info:</strong><br />
         • Adjustments save automatically when slider is released<br />
         • Changes apply in real-time to suspension<br />
+        • Ride Height: 0% = min position, 100% = max position (use during driving)<br />
+        • For static leveling and min/max limits, use Servo Config page<br />
         • Click ? icons for parameter help
       </div>
     </div>
