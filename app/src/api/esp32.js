@@ -13,11 +13,22 @@ export const setEsp32Ip = (ip) => {
 
 const apiUrl = (endpoint) => `http://${getEsp32Ip()}${endpoint}`;
 
-// Health check
+// Health check with short timeout for quick disconnect detection
 export const getHealth = async () => {
-  const response = await fetch(apiUrl('/api/health'));
-  if (!response.ok) throw new Error('Health check failed');
-  return response.json();
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 2000); // 2 second timeout
+  
+  try {
+    const response = await fetch(apiUrl('/api/health'), {
+      signal: controller.signal
+    });
+    clearTimeout(timeoutId);
+    if (!response.ok) throw new Error('Health check failed');
+    return response.json();
+  } catch (error) {
+    clearTimeout(timeoutId);
+    throw error;
+  }
 };
 
 // Get full configuration
@@ -32,7 +43,7 @@ export const updateConfigParam = async (param, value) => {
   const response = await fetch(apiUrl('/api/config'), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ param, value })
+    body: JSON.stringify({ [param]: value })
   });
   if (!response.ok) throw new Error('Failed to update config');
   return response.json();
@@ -82,59 +93,31 @@ export const calibrateServo = async (servo) => {
   return response.json();
 };
 
-// WebSocket for live data
-export class SuspensionWebSocket {
-  constructor(onMessage) {
-    this.ws = null;
-    this.onMessage = onMessage;
-    this.reconnectInterval = null;
-  }
+// Calibrate MPU6050 (Set Level)
+export const calibrateMPU = async () => {
+  const response = await fetch(apiUrl('/api/calibrate'), {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({})
+  });
+  if (!response.ok) throw new Error('Failed to calibrate MPU6050');
+  return response.json();
+};
 
-  connect() {
-    const wsUrl = `ws://${getEsp32Ip()}/ws`;
-    this.ws = new WebSocket(wsUrl);
-
-    this.ws.onopen = () => {
-      console.log('WebSocket connected');
-      if (this.reconnectInterval) {
-        clearInterval(this.reconnectInterval);
-        this.reconnectInterval = null;
-      }
-    };
-
-    this.ws.onmessage = (event) => {
-      try {
-        const data = JSON.parse(event.data);
-        this.onMessage(data);
-      } catch (error) {
-        console.error('WebSocket message error:', error);
-      }
-    };
-
-    this.ws.onerror = (error) => {
-      console.error('WebSocket error:', error);
-    };
-
-    this.ws.onclose = () => {
-      console.log('WebSocket disconnected');
-      // Auto-reconnect after 5 seconds
-      if (!this.reconnectInterval) {
-        this.reconnectInterval = setInterval(() => {
-          console.log('Attempting to reconnect...');
-          this.connect();
-        }, 5000);
-      }
-    };
-  }
-
-  disconnect() {
-    if (this.reconnectInterval) {
-      clearInterval(this.reconnectInterval);
-      this.reconnectInterval = null;
-    }
-    if (this.ws) {
-      this.ws.close();
-      this.ws = null;
-    }
+// Get live sensor and battery data (HTTP polling)
+export const getSensorData = async () => {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 1500); // 1.5 second timeout
+  
+  try {
+    const response = await fetch(apiUrl('/api/sensors'), {
+      signal: controller.signal
+    });
+    clearTimeout(timeoutId);
+    if (!response.ok) throw new Error('Failed to get sensor data');
+    return response.json();
+  } catch (error) {
+    clearTimeout(timeoutId);
+    throw error;
   }
 }

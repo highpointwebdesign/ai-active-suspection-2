@@ -33,6 +33,12 @@ float batteryVoltages[3] = {0.0f, 0.0f, 0.0f}; // Voltages for 3 batteries
 unsigned long lastBatteryReadTime = 0;
 const unsigned long BATTERY_READ_INTERVAL = 500; // Read batteries every 500ms
 
+// Sensor data for HTTP polling
+float currentRoll = 0.0f;
+float currentPitch = 0.0f;
+float currentYaw = 0.0f;
+float currentVerticalAccel = 0.0f;
+
 // Function to read battery voltage from ADC pin
 float readBatteryVoltage(uint8_t plugAssignment) {
   if (plugAssignment == 0) return 0.0f; // No plug assigned
@@ -262,9 +268,11 @@ void loop() {
     if (currentTime - lastBroadcast >= 500) {
       if (mpuConnected) {
         webServer.sendSensorData(roll, pitch, yaw, verticalAccel);
+        webServer.setSensorData(roll, pitch, yaw, verticalAccel); // Store for HTTP polling
       } else {
         // Send NaN values when sensor offline - dashboard will display '--'
         webServer.sendSensorData(NAN, NAN, NAN, NAN);
+        webServer.setSensorData(NAN, NAN, NAN, NAN); // Store for HTTP polling
       }
       lastBroadcast = currentTime;
     }
@@ -283,6 +291,7 @@ void loop() {
     
     // Broadcast battery voltages to web clients
     webServer.sendBatteryData(batteryVoltages[0], batteryVoltages[1], batteryVoltages[2]);
+    webServer.setBatteryData(batteryVoltages[0], batteryVoltages[1], batteryVoltages[2]); // Store for HTTP polling
     
     lastBatteryReadTime = currentTime;
   }

@@ -1,0 +1,108 @@
+.sensor-gauge {
+  background: linear-gradient(135deg, rgba(15, 52, 96, 0.6) 0%, rgba(10, 14, 39, 0.8) 100%);
+  border: 2px solid #0f3460;
+  border-radius: 12px;
+  padding: 1.5rem;
+  transition: all 0.3s;
+}
+
+.sensor-gauge.warning {
+  border-color: #ff6b6b;
+  box-shadow: 0 0 20px rgba(255, 107, 107, 0.3);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(255, 107, 107, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(255, 107, 107, 0.6);
+  }
+}
+
+.gauge-label {
+  font-size: 1rem;
+  color: #888;
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.gauge-display {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.gauge-value {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #16c79a;
+  font-family: 'Courier New', monospace;
+  text-align: center;
+}
+
+.sensor-gauge.warning .gauge-value {
+  color: #ff6b6b;
+}
+
+.gauge-unit {
+  font-size: 2rem;
+  color: #888;
+  margin-left: 0.25rem;
+  vertical-align: super;
+}
+
+.gauge-bar-container {
+  position: relative;
+}
+
+.gauge-bar-track {
+  position: relative;
+  height: 8px;
+  background: rgba(15, 52, 96, 0.5);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.gauge-bar-center-line {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: rgba(255, 255, 255, 0.3);
+  z-index: 2;
+}
+
+.gauge-bar-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, #16c79a 0%, #11d3bc 100%);
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.sensor-gauge.warning .gauge-bar-fill {
+  background: linear-gradient(90deg, #ff6b6b 0%, #ff4444 100%);
+}
+
+.gauge-range {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: #666;
+}
+
+@media (max-width: 768px) {
+  .gauge-value {
+    font-size: 2rem;
+  }
+  
+  .sensor-gauge {
+    padding: 1rem;
+  }
+}

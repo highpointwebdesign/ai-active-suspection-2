@@ -17,6 +17,15 @@ private:
   std::function<bool()> mpuStatusCallback = nullptr;
   std::function<void(uint8_t)> orientationCallback = nullptr;
   
+  // Latest sensor data for HTTP polling
+  float latestRoll = 0.0f;
+  float latestPitch = 0.0f;
+  float latestYaw = 0.0f;
+  float latestVerticalAccel = 0.0f;
+  float latestBattery1 = 0.0f;
+  float latestBattery2 = 0.0f;
+  float latestBattery3 = 0.0f;
+  
 public:
   void init(StorageManager& storage) {
     storageManager = &storage;
@@ -78,6 +87,21 @@ public:
     orientationCallback = callback;
   }
   
+  // Store latest sensor data for HTTP polling
+  void setSensorData(float roll, float pitch, float yaw, float verticalAccel) {
+    latestRoll = roll;
+    latestPitch = pitch;
+    latestYaw = yaw;
+    latestVerticalAccel = verticalAccel;
+  }
+  
+  // Store latest battery data for HTTP polling
+  void setBatteryData(float battery1, float battery2, float battery3) {
+    latestBattery1 = battery1;
+    latestBattery2 = battery2;
+    latestBattery3 = battery3;
+  }
+  
 private:
   void startWiFiAP() {
     // First, try to connect to home WiFi
@@ -100,7 +124,7 @@ private:
     
     // Check if connected to home WiFi
     if (WiFi.status() == WL_CONNECTED) {
-      Serial.println("✓ Connected to home WiFi!");
+      Serial.println("Connected to home WiFi");
       Serial.print("IP address: ");
       Serial.println(WiFi.localIP());
       Serial.print("Access web interface at: http://");
@@ -128,6 +152,16 @@ private:
   }
   
   void setupRoutes() {
+    // Enable CORS for all routes
+    DefaultHeaders::Instance().addHeader("Access-Control-Allow-Origin", "*");
+    DefaultHeaders::Instance().addHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+    DefaultHeaders::Instance().addHeader("Access-Control-Allow-Headers", "Content-Type");
+    
+    // Handle OPTIONS preflight requests
+    server.on("/*", HTTP_OPTIONS, [](AsyncWebServerRequest *request) {
+      request->send(200);
+    });
+    
     // Serve dashboard page (home)
     server.on("/", HTTP_GET, [this](AsyncWebServerRequest *request) {
       request->send(200, "text/html", getDashboardPage());
@@ -155,6 +189,17 @@ private:
         mpuOk = mpuStatusCallback();
       }
       String json = "{\"status\":\"ok\",\"mpu6050\":" + String(mpuOk ? "true" : "false") + "}";
+      request->send(200, "application/json", json);
+    });
+    
+    // API endpoint for sensor data (HTTP polling)
+    server.on("/api/sensors", HTTP_GET, [this](AsyncWebServerRequest *request) {
+      String json = "{\"roll\":" + String(latestRoll, 1) + 
+                    ",\"pitch\":" + String(latestPitch, 1) + 
+                    ",\"yaw\":" + String(latestYaw, 1) + 
+                    ",\"verticalAccel\":" + String(latestVerticalAccel, 2) + 
+                    ",\"batteries\":[" + String(latestBattery1, 2) + "," + 
+                    String(latestBattery2, 2) + "," + String(latestBattery3, 2) + "]}";
       request->send(200, "application/json", json);
     });
     
@@ -197,26 +242,43 @@ private:
         DeserializationError error = deserializeJson(doc, data);
         
         if (!error) {
+          Serial.print("Config update received: ");
+          serializeJson(doc, Serial);
+          Serial.println();
+          
           if (doc.containsKey("reactionSpeed")) {
-            storageManager->updateParameter("reactionSpeed", doc["reactionSpeed"]);
+            float val = doc["reactionSpeed"];
+            Serial.printf("Updating reactionSpeed to: %.2f\n", val);
+            storageManager->updateParameter("reactionSpeed", val);
           }
           if (doc.containsKey("rideHeightOffset")) {
-            storageManager->updateParameter("rideHeightOffset", doc["rideHeightOffset"]);
+            float val = doc["rideHeightOffset"];
+            Serial.printf("Updating rideHeightOffset to: %.0f\n", val);
+            storageManager->updateParameter("rideHeightOffset", val);
           }
           if (doc.containsKey("rangeLimit")) {
-            storageManager->updateParameter("rangeLimit", doc["rangeLimit"]);
+            float val = doc["rangeLimit"];
+            Serial.printf("Updating rangeLimit to: %.0f\n", val);
+            storageManager->updateParameter("rangeLimit", val);
           }
           if (doc.containsKey("damping")) {
-            storageManager->updateParameter("damping", doc["damping"]);
+            float val = doc["damping"];
+            Serial.printf("Updating damping to: %.2f\n", val);
+            storageManager->updateParameter("damping", val);
           }
           if (doc.containsKey("frontRearBalance")) {
-            storageManager->updateParameter("frontRearBalance", doc["frontRearBalance"]);
+            float val = doc["frontRearBalance"];
+            Serial.printf("Updating frontRearBalance to: %.2f\n", val);
+            storageManager->updateParameter("frontRearBalance", val);
           }
           if (doc.containsKey("stiffness")) {
-            storageManager->updateParameter("stiffness", doc["stiffness"]);
+            float val = doc["stiffness"];
+            Serial.printf("Updating stiffness to: %.2f\n", val);
+            storageManager->updateParameter("stiffness", val);
           }
           if (doc.containsKey("mpuOrientation")) {
             uint8_t orientation = doc["mpuOrientation"];
+            Serial.printf("Updating mpuOrientation to: %d\n", orientation);
             storageManager->updateParameter("mpuOrientation", orientation);
             // Notify sensor fusion of orientation change
             if (orientationCallback) {
@@ -226,6 +288,7 @@ private:
           
           request->send(200, "application/json", "{\"status\":\"success\"}");
         } else {
+          Serial.println("Config update JSON parse error");
           request->send(400, "application/json", "{\"status\":\"error\"}");
         }
       });
@@ -635,7 +698,7 @@ private:
         });
         
         // Global save indicator function
-        function showSaveIndicator(message = '✓ Saved') {
+        function showSaveIndicator(message = 'Saved') {
             let indicator = document.getElementById('globalSaveIndicator');
             if (!indicator) {
                 indicator = document.createElement('div');
@@ -667,7 +730,7 @@ private:
                 
                 if (response.ok) {
                     const data = await response.json();
-                    const mpuStatus = data.mpu6050 ? '✓' : '✗';
+                    const mpuStatus = data.mpu6050 ? true : false;
                     const mpuColor = data.mpu6050 ? '#155724' : '#dc3545';
                     
                     const statusEl = document.getElementById('systemStatus');
@@ -677,7 +740,7 @@ private:
                         statusEl.style.background = '#d4edda';
                         statusEl.style.borderLeftColor = '#28a745';
                         statusEl.style.color = '#155724';
-                        statusTextEl.innerHTML = '✓ ESP32 Connected<br><span style="color:' + mpuColor + '">' + mpuStatus + ' Gyro ' + (data.mpu6050 ? 'Online' : 'Offline') + '</span>';
+                        statusTextEl.innerHTML = 'ESP32 Connected<br><span style="color:' + mpuColor + '">' + mpuStatus + ' Gyro ' + (data.mpu6050 ? 'Online' : 'Offline') + '</span>';
                     }
                 } else {
                     updateSystemStatus('✗ Connection Lost', 'error');
@@ -725,13 +788,13 @@ private:
                 });
                 
                 if (response.ok) {
-                    showSaveIndicator('✓ Level has been set');
+                    showSaveIndicator('Level has been set');
                 } else {
-                    showSaveIndicator('⚠ Failed to set level');
+                    showSaveIndicator('Failed to set level');
                 }
             } catch (error) {
                 console.error('Failed to calibrate:', error);
-                showSaveIndicator('⚠ Failed to set level');
+                showSaveIndicator('Failed to set level');
             }
         }
     )===";
@@ -1255,7 +1318,10 @@ private:
         // Load config on page load
         window.addEventListener('load', loadConfig);
         
-        // Update value displays and auto-save on input
+        // Track if we're currently saving to prevent reload conflicts
+        let isSaving = false;
+        
+        // Update value displays and save on change
         Object.keys(controls).forEach(key => {
             controls[key].addEventListener('input', (e) => {
                 valueDisplays[key].textContent = parseFloat(e.target.value).toFixed(
@@ -1263,10 +1329,13 @@ private:
                 );
             });
             
-            // Auto-save on change (when slider is released)
             controls[key].addEventListener('change', async (e) => {
+                if (isSaving) return; // Prevent duplicate saves
+                isSaving = true;
+                
+                const newValue = parseFloat(e.target.value);
                 const config = {};
-                config[key] = parseFloat(e.target.value);
+                config[key] = newValue;
                 
                 try {
                     const response = await fetch('/api/config', {
@@ -1277,9 +1346,19 @@ private:
                     
                     if (response.ok) {
                         showSaveIndicator();
+                        // Don't reload - keep the value the user just set
+                        console.log('Saved ' + key + ' = ' + newValue);
+                    } else {
+                        console.error('Save failed for ' + key);
+                        // On failure, reload to restore correct value
+                        await loadConfig();
                     }
                 } catch (error) {
                     console.error('Failed to save ' + key + ':', error);
+                    // On error, reload to restore correct value
+                    await loadConfig();
+                } finally {
+                    isSaving = false;
                 }
             });
         });
@@ -1345,7 +1424,7 @@ private:
                 });
                 
                 if (response.ok) {
-                    showSaveIndicator('✓ Configuration saved');
+                    showSaveIndicator('Configuration saved');
                 }
             } catch (error) {
                 console.error('Failed to save config:', error);
@@ -1361,7 +1440,7 @@ private:
                     
                     if (response.ok) {
                         await loadConfig();
-                        showSaveIndicator('✓ Settings reset');
+                        showSaveIndicator('Settings reset');
                     }
                 } catch (error) {
                     console.error('Failed to reset config:', error);
@@ -2312,7 +2391,7 @@ private:
                 });
                 
                 if (response.ok) {
-                    showSaveIndicator('✓ Orientation saved');
+                    showSaveIndicator('Orientation saved');
                 }
             } catch (error) {
                 console.error('Failed to save orientation:', error);
