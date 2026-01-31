@@ -12,8 +12,8 @@
 }
 
 .coming-soon {
-  background: rgba(15, 52, 96, 0.3);
-  border: 1px solid #0f3460;
+  background: linear-gradient(135deg, rgba(15, 52, 96, 0.6) 0%, rgba(10, 14, 39, 0.8) 100%);
+  border: 2px solid #0f3460;
   border-radius: 12px;
   padding: 3rem;
   text-align: center;

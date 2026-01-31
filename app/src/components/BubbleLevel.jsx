@@ -43,7 +43,7 @@ function BubbleLevel() {
 
   return (
     <div className="bubble-level-container">
-      <div className="bubble-level-label">Level Indicator</div>
+      <div className="bubble-level-label">Chassis Level Indicator</div>
       <div className={`bubble-level ${isLevel ? 'level' : ''}`}>
         {/* Crosshairs */}
         <div className="crosshair horizontal"></div>

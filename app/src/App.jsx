@@ -102,11 +102,30 @@ function App() {
   return (
     <div className="app">
       <header>
-        <h1>🏎️ Suspension Control</h1>
+        <h1>R/C PerformanceIQ</h1>
         <div className="header-controls">
-          <div className={`status-indicator ${connected ? 'connected' : 'disconnected'}`}>
-            <div className="status-dot"></div>
-          </div>
+          <button
+            className="network-settings-btn"
+            title="Network Settings"
+            onClick={() => setShowSettings(true)}
+            style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+          >
+            <svg
+              width="28" height="28" viewBox="0 0 24 24"
+              fill="none"
+              stroke={connected ? '#16c79a' : '#888'}
+              style={{ opacity: connected ? 1 : 0.6, transition: 'stroke 0.3s, opacity 0.3s' }}
+              strokeWidth="2"
+            >
+              <path d="M5 12.55a11 11 0 0 1 14.08 0" />
+              <path d="M1.42 9a16 16 0 0 1 21.16 0" />
+              <path d="M8.53 16.11a6 6 0 0 1 6.95 0" />
+              <circle cx="12" cy="20" r="1" fill={connected ? '#16c79a' : '#888'} />
+              {!connected && (
+                <line x1="4" y1="4" x2="20" y2="20" stroke="#888" strokeWidth="2.5" strokeLinecap="round" />
+              )}
+            </svg>
+          </button>
         </div>
       </header>
 

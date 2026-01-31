@@ -3,7 +3,7 @@ import './Lights.css';
 function Lights() {
   return (
     <div className="lights-page">
-      <h2>Light Configuration</h2>
+      <h2>Lighting</h2>
       <div className="coming-soon">
         <p>Light configuration coming soon...</p>
       </div>

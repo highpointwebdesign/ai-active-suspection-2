@@ -39,7 +39,7 @@ function Dashboard({ sensorData, batteryData, config, onCalibrate, rolloverDetec
         </div>
       )}
       <div className="dashboard-header">
-        <h2>Live Telemetry</h2>
+        <h2>Dashboard</h2>
         <div className="header-buttons">
           <button 
             className={`set-level-btn ${calibrating ? 'calibrating' : ''}`}
@@ -94,7 +94,7 @@ function Dashboard({ sensorData, batteryData, config, onCalibrate, rolloverDetec
 
       {config && (
         <div className="config-section">
-          <h3>⚙️ Current Settings</h3>
+          <h3>Current Settings</h3>
           <div className="config-grid">
             <div className="config-item">
               <span className="config-label">Reaction Speed</span>

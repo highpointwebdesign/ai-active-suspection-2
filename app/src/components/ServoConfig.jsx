@@ -2,7 +2,8 @@ import { useState, useRef, useEffect, memo, useCallback } from 'react';
 import noUiSlider from 'nouislider';
 import 'nouislider/dist/nouislider.css';
 import './ServoConfig.css';
-import { updateServoParam, calibrateMPU, getSensorData } from '../api/esp32';
+import '../styles.css';
+import { updateServoParam, calibrateMPU, getSensorData, getBatteryConfig, updateBatteryParam } from '../api/esp32';
 import BubbleLevel from './BubbleLevel';
 
 const ServoColumn = memo(({ title, servoKey, servo, onReverse, onReset }) => {
@@ -65,7 +66,7 @@ const ServoColumn = memo(({ title, servoKey, servo, onReverse, onReset }) => {
 
   return (
     <div className="servo-column">
-      <h3>{title}</h3>
+      <h3 style={{textAlign:'left'}}>{title}</h3>
       <div className="sliders-container">
         <div className="slider-wrapper-combined">
           <div ref={sliderRef} className="nouislider-combined"></div>
@@ -93,6 +94,49 @@ const ServoColumn = memo(({ title, servoKey, servo, onReverse, onReset }) => {
 ServoColumn.displayName = 'ServoColumn';
 
 function ServoConfig({ config, onUpdateConfig }) {
+  // Collapsible section state, collapsed by default, persisted in localStorage
+  const getSectionState = (key, def) => {
+    if (typeof window === 'undefined') return def;
+    const v = localStorage.getItem(key);
+    return v === null ? def : v === 'true';
+  };
+  const [showServo, setShowServo] = useState(() => getSectionState('showServo', false));
+  const [showBattery, setShowBattery] = useState(() => getSectionState('showBattery', false));
+  const [showMPU, setShowMPU] = useState(() => getSectionState('showMPU', false));
+
+  // Persist section state to localStorage
+  const toggleSection = (key, setter, value) => {
+    setter(value);
+    if (typeof window !== 'undefined') localStorage.setItem(key, value);
+  };
+  // Battery config state
+  const [batteryConfig, setBatteryConfig] = useState([
+    { name: '', cellCount: 3, plugAssignment: 0, showOnDashboard: 1 },
+    { name: '', cellCount: 3, plugAssignment: 0, showOnDashboard: 1 },
+    { name: '', cellCount: 3, plugAssignment: 0, showOnDashboard: 1 }
+  ]);
+  const [batteryLoading, setBatteryLoading] = useState(true);
+  const [batteryError, setBatteryError] = useState('');
+
+  // Load battery config on mount
+  useEffect(() => {
+    let mounted = true;
+    setBatteryLoading(true);
+    getBatteryConfig()
+      .then(cfg => { if (mounted) { setBatteryConfig(cfg); setBatteryLoading(false); } })
+      .catch(err => { if (mounted) { setBatteryError('Failed to load battery config'); setBatteryLoading(false); } });
+    return () => { mounted = false; };
+  }, []);
+
+  // Update handler for battery config
+  const updateBatteryParamLocal = (num, param, value) => {
+    setBatteryConfig(prev => {
+      const updated = [...prev];
+      updated[num - 1] = { ...updated[num - 1], [param]: value };
+      return updated;
+    });
+    updateBatteryParam(num, param, value).catch(() => setBatteryError('Failed to update battery config'));
+  };
   const [servos, setServos] = useState({
     frontLeft: { min: 30, max: 150, trim: 0, reversed: false },
     frontRight: { min: 30, max: 150, trim: 0, reversed: false },
@@ -371,49 +415,175 @@ function ServoConfig({ config, onUpdateConfig }) {
         </div>
       )}
 
-      <div className="servo-config-header">
-        <h2>Servo Calibration</h2>
-        <div className="header-buttons">
-          <button 
-            className={`set-level-btn ${calibrating ? 'calibrating' : ''}`}
-            onClick={handleSetLevel}
-            disabled={calibrating || autoLeveling}
-          >
-            {calibrating ? 'Calibrating...' : 'Set Level'}
-          </button>
-          <button 
-            className={`auto-level-btn ${autoLeveling ? 'active' : ''}`}
-            onClick={handleAutoLevel}
-            disabled={calibrating || autoLeveling}
-          >
-            {autoLeveling ? levelingStatus : 'Auto Level'}
-          </button>
+      <div className="dashboard">
+        <div className="dashboard-header">
+          <h2>Settings</h2>
+          <div className="header-buttons">
+            <button 
+              className={`set-level-btn ${calibrating ? 'calibrating' : ''}`}
+              onClick={handleSetLevel}
+              disabled={calibrating || autoLeveling}
+            >
+              {calibrating ? 'Calibrating...' : 'Set Level'}
+            </button>
+            <button 
+              className={`auto-level-btn ${autoLeveling ? 'active' : ''}`}
+              onClick={handleAutoLevel}
+              disabled={calibrating || autoLeveling}
+            >
+              {autoLeveling ? levelingStatus : 'Auto Level'}
+            </button>
+          </div>
         </div>
-      </div>
 
-      {/* Bubble Level Indicator */}
-      <BubbleLevel />
+        {/* Section Placeholders */}
+        <div className="servo-section-placeholder">
+          <h3 style={{textAlign:'left', cursor:'pointer', userSelect:'none', display:'flex', alignItems:'center'}} onClick={() => toggleSection('showServo', setShowServo, !showServo)}>
+            <span style={{ fontWeight: 600, marginRight: 8 }}>{showServo ? '−' : '+'}</span> Servo Configuration
+          </h3>
+          {showServo && (
+            <div className="section-content">
+              {/* Bubble Level Indicator */}
+              <BubbleLevel />
+              {/* Individual Mode - Four Sliders Only */}
+              <div className="servo-grid">
+                <ServoColumn key="frontLeft" title="Front Left" servoKey="frontLeft" servo={servos.frontLeft} onReverse={handleReverse} onReset={resetServo} />
+                <ServoColumn key="frontRight" title="Front Right" servoKey="frontRight" servo={servos.frontRight} onReverse={handleReverse} onReset={resetServo} />
+                <ServoColumn key="rearLeft" title="Rear Left" servoKey="rearLeft" servo={servos.rearLeft} onReverse={handleReverse} onReset={resetServo} />
+                <ServoColumn key="rearRight" title="Rear Right" servoKey="rearRight" servo={servos.rearRight} onReverse={handleReverse} onReset={resetServo} />
+              </div>
+              <button className="btn-reset-all" onClick={resetAll}>
+                Reset All Servos to Defaults
+              </button>
+              <div className="info-box" style={{ marginTop: 16 }}>
+                <strong>Servo Tips:</strong><br />
+                • <span style={{color: '#764ba2', fontWeight: 'bold'}}>Purple Handle (MAX)</span> - Maximum servo angle limit (safety constraint)<br />
+                • <span style={{color: '#16c79a', fontWeight: 'bold'}}>Teal Handle (TRIM)</span> - Static leveling adjustment per corner<br />
+                • <span style={{color: '#4a90e2', fontWeight: 'bold'}}>Blue Handle (MIN)</span> - Minimum servo angle limit (safety constraint)<br />        
+                • This page is for ONE-TIME setup and static leveling<br />
+                • For dynamic ride height during driving, use Suspension Tuning page<br />
+                • Use Auto Level to automatically adjust trims<br />
+                • Changes are saved automatically to the ESP32
+              </div>
+            </div>
+          )}
+        </div>
+        <div className="servo-section-placeholder">
+          <h3 style={{textAlign:'left', cursor:'pointer', userSelect:'none', display:'flex', alignItems:'center'}} onClick={() => toggleSection('showMPU', setShowMPU, !showMPU)}>
+            <span style={{ fontWeight: 600, marginRight: 8 }}>{showMPU ? '−' : '+'}</span> Gyro Orientation
+          </h3>
+          {showMPU && (
+            <>
+              <div className="section-content">
+                <form onSubmit={e => e.preventDefault()} style={{ textAlign: 'left' }}>
+                  <label htmlFor="mpuOrientation" style={{ fontWeight: 600, display: 'block', marginBottom: 8 }}>
+                    Physical Mounting
+                  </label>
+                  <select
+                    id="mpuOrientation"
+                    className="orientation-select"
+                    value={config?.mpuOrientation ?? 0}
+                    onChange={e => updateConfigParam('mpuOrientation', parseInt(e.target.value))}
+                    style={{ width: '100%', padding: '0.5rem', borderRadius: 6, border: '1px solid #16c79a', marginBottom: 12 }}
+                  >
+                    <option value={0}>Arrow Forward, Chip Up (Default)</option>
+                    <option value={1}>Arrow Up, Chip Forward</option>
+                    <option value={2}>Arrow Backward, Chip Up</option>
+                    <option value={3}>Arrow Down, Chip Forward</option>
+                    <option value={4}>Arrow Right, Chip Up</option>
+                    <option value={5}>Arrow Left, Chip Up</option>
+                  </select>
+                  {/* <div className="info-box" style={{ marginTop: 16, background: 'rgba(22, 199, 154, 0.07)' }}>
+                    <strong>Orientation Guide:</strong><br />
+                  </div> */}
+                </form>
+              </div>
+              <div className="info-box" style={{ marginTop: 16 }}>
+                <strong>Calibration Tips:</strong><br />
+                • Select how your MPU6050 sensor is physically mounted. The arrow is printed on the chip. Correct orientation is critical for accurate roll/pitch readings. This is a one-time setup based on your installation.
+              </div>
+            </>
+          )}
+        </div>
+        <div className="servo-section-placeholder">
+          <h3 style={{cursor:'pointer', userSelect:'none', display:'flex', alignItems:'center'}} onClick={() => toggleSection('showBattery', setShowBattery, !showBattery)}>
+            <span style={{ fontWeight: 600, marginRight: 8 }}>{showBattery ? '−' : '+'}</span> Battery Configuration
+          </h3>
+          {showBattery && (
+            <div className="section-content">
+              {[1, 2, 3].map((num) => (
+                <div key={num} style={{   background: 'linear-gradient(135deg, rgba(15, 52, 96, 0.6) 0%, rgba(10, 14, 39, 0.8) 100%)',
+  border: '1px solid #4a90e2',  borderRadius: '12px',  padding: '2rem 1.5rem',  margin: '1.5rem 0' }}>
+                  <h3 style={{ textAlign: 'left' }}>Battery {num}</h3>  
+                  <div style={{ marginBottom: 10 }}>
+                    <label style={{ fontWeight: 600, display: 'block', marginBottom: 8, textAlign: 'left' }}>Name</label>
+                    <input
+                      type="text"
+                      placeholder={num === 1 ? 'e.g., Main Drive' : num === 2 ? 'e.g., FPV System' : 'e.g., Lights & Accessories'}
+                      style={{ width: '100%', padding: 8, border: '1px solid #ddd', borderRadius: 4, fontSize: 14 }}
+                      value={batteryConfig?.[num - 1]?.name || ''}
+                      onChange={e => updateBatteryParamLocal(num, 'name', e.target.value)}
+                    />
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 10 }}>
+                    <div>
+                      <label style={{ fontWeight: 600, display: 'block', marginBottom: 8, textAlign:'left' }}>Cell Count</label>
+                      <select
+                        className="orientation-select"
+                        style={{width: '100%', padding: 8, border: '1px solid rgb(221, 221, 221)', borderRadius: 4, fontSize: 14}}
+                        value={batteryConfig?.[num - 1]?.cellCount || 3}
+                        onChange={e => updateBatteryParamLocal(num, 'cellCount', parseInt(e.target.value))}
+                      >
+                        <option value={1}>1S (3.7V)</option>
+                        <option value={2}>2S (7.4V)</option>
+                        <option value={3}>3S (11.1V)</option>
+                        <option value={4}>4S (14.8V)</option>
+                        <option value={5}>5S (18.5V)</option>
+                        <option value={6}>6S (22.2V)</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label style={{ fontWeight: 600, display: 'block', marginBottom: 8, textAlign:'left' }}>Plug Assignment</label>
+                      <select
+                        className="orientation-select"
+                        style={{width: '100%', padding: 8, border: '1px solid rgb(221, 221, 221)', borderRadius: 4, fontSize: 14}}
+                        value={batteryConfig?.[num - 1]?.plugAssignment || 0}
+                        onChange={e => updateBatteryParamLocal(num, 'plugAssignment', parseInt(e.target.value))}
+                      >
+                        <option value={0}>None</option>
+                        <option value={1}>Plug A (GPIO 34)</option>
+                        <option value={2}>Plug B (GPIO 35)</option>
+                        <option value={3}>Plug C (GPIO 32)</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <label className="toggle-switch">
+                      <input
+                        type="checkbox"
+                        checked={!!batteryConfig?.[num - 1]?.showOnDashboard}
+                        onChange={e => updateBatteryParamLocal(num, 'showOnDashboard', e.target.checked ? 1 : 0)}
+                      />
+                      <span className="toggle-slider"></span>
+                    </label>
+                    <span style={{ fontSize: 14}}>Show on Dashboard</span>
+                  </div>
+                </div>
+              ))}
 
-      {/* Individual Mode - Four Sliders Only */}
-      <div className="servo-grid">
-        <ServoColumn key="frontLeft" title="Front Left" servoKey="frontLeft" servo={servos.frontLeft} onReverse={handleReverse} onReset={resetServo} />
-        <ServoColumn key="frontRight" title="Front Right" servoKey="frontRight" servo={servos.frontRight} onReverse={handleReverse} onReset={resetServo} />
-        <ServoColumn key="rearLeft" title="Rear Left" servoKey="rearLeft" servo={servos.rearLeft} onReverse={handleReverse} onReset={resetServo} />
-        <ServoColumn key="rearRight" title="Rear Right" servoKey="rearRight" servo={servos.rearRight} onReverse={handleReverse} onReset={resetServo} />
-      </div>
-      <button className="btn-reset-all" onClick={resetAll}>
-        Reset All Servos to Defaults
-      </button>
+              <div className="info-box" style={{ marginTop: 16 }}>
+                <strong>Battery Info:</strong><br />
+                Important:<br />
+                • Requires voltage divider circuits on GPIO pins (8:1 ratio recommended)<br />
+                • Each plug can only be assigned to one battery<br />
+                • Dashboard will only show batteries with "Show on Dashboard" enabled<br />
+                • Plug A = GPIO 34, Plug B = GPIO 35, Plug C = GPIO 32 (ADC pins)
+              </div>
+            </div>
+          )}
+        </div>
 
-      <div className="info-box">
-        <strong>Calibration Tips:</strong><br />
-        • <span style={{color: '#764ba2', fontWeight: 'bold'}}>Purple Handle (MAX)</span> - Maximum servo angle limit (safety constraint)<br />
-        • <span style={{color: '#16c79a', fontWeight: 'bold'}}>Teal Handle (TRIM)</span> - Static leveling adjustment per corner<br />
-        • <span style={{color: '#4a90e2', fontWeight: 'bold'}}>Blue Handle (MIN)</span> - Minimum servo angle limit (safety constraint)<br />        
-        • This page is for ONE-TIME setup and static leveling<br />
-        • For dynamic ride height during driving, use Suspension Tuning page<br />
-        • Use Auto Level to automatically adjust trims<br />
-        • Changes are saved automatically to the ESP32
+        {/* Calibration Tips info-box moved above */}
       </div>
     </div>
   );

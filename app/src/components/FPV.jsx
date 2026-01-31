@@ -146,10 +146,7 @@ function FPV() {
       
       <div className="fpv-section">
         <h3>FPV</h3>
-        <div className="info-box">
-          <p>Full power mode provides maximum video quality but generates more heat. 
-          Enable during driving, disable during idle to prevent overheating.</p>
-        </div>
+        {/* Info moved to grouped info box below */}
         
         <div className="auto-mode-control">
           <div className="auto-mode-header">
@@ -189,9 +186,7 @@ function FPV() {
 
       <div className="fpv-section">
         <h3>Gimbal Control</h3>
-        <div className="info-box">
-          <p>Reset gimbal orientation to default position. Use this if the camera angle becomes misaligned.</p>
-        </div>
+        {/* Info moved to grouped info box below */}
         
         <button 
           className={`gimbal-reset-btn ${resetting ? 'resetting' : ''}`}
@@ -200,6 +195,11 @@ function FPV() {
         >
           {resetting ? 'Resetting Gimbal...' : 'Reset Gimbal'}
         </button>
+      </div>
+      <div className="info-box">
+        <strong>Info:</strong><br />
+        • Full power mode provides maximum video quality but generates more heat. Enable during driving, disable during idle to prevent overheating.<br />
+        • Reset gimbal orientation to default position if the camera angle becomes misaligned.<br />
       </div>
     </div>
   );

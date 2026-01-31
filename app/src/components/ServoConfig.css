@@ -1,3 +1,26 @@
+.info-box {
+  text-align: left;
+}
+/* Section placeholders styled like lights */
+.servo-section-placeholder {
+  background: linear-gradient(135deg, rgba(15, 52, 96, 0.6) 0%, rgba(10, 14, 39, 0.8) 100%);
+  border: 2px solid #0f3460;
+  border-radius: 12px;
+  padding: 1rem 1.5rem;
+  margin: 1.5rem 0;
+  text-align: center;
+}
+
+.servo-section-placeholder h3 {
+  font-size: 1.2rem;
+  color: #16c79a;
+  margin-bottom: 1rem;
+}
+
+.servo-section-placeholder .section-content {
+  font-size: 1.1rem;
+  color: #888;
+}
 .servo-config-page {
   padding: 1rem;
   padding-bottom: 5rem;
@@ -46,9 +69,10 @@
   white-space: nowrap;
 }
 
+
 .set-level-btn {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+  background: linear-gradient(135deg, #16c79a 0%, #11998e 100%);
+  box-shadow: 0 2px 8px rgba(22, 199, 154, 0.3);
 }
 
 .auto-level-btn {
@@ -214,7 +238,7 @@
 
 .servo-column {
   background: rgba(15, 52, 96, 0.3);
-  border: 1px solid #0f3460;
+  border: 1px solid #4a90e2;
   border-radius: 12px;
   padding: 15px 10px;
   display: flex;
