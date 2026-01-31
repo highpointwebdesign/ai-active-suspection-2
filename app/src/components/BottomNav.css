@@ -1,0 +1,72 @@
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(135deg, #0f3460 0%, #0a0e27 100%);
+  border-top: 2px solid #16c79a;
+  display: flex;
+  justify-content: space-around;
+  padding: 0.75rem 0;
+  z-index: 100;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.nav-item {
+  background: transparent;
+  border: none;
+  color: #888;
+  cursor: pointer;
+  padding: 0.75rem 1.5rem;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+}
+
+.nav-item:hover {
+  color: #16c79a;
+  background: rgba(22, 199, 154, 0.1);
+  transform: translateY(-2px);
+}
+
+.nav-item.active {
+  color: #16c79a;
+  background: rgba(22, 199, 154, 0.2);
+}
+
+.nav-item svg {
+  width: 24px;
+  height: 24px;
+}
+
+.nav-item.set-level-nav {
+  color: #667eea;
+}
+
+.nav-item.set-level-nav:hover {
+  color: #764ba2;
+  background: rgba(102, 126, 234, 0.15);
+}
+
+.nav-item.set-level-nav.calibrating {
+  color: #16c79a;
+  animation: navPulse 1.5s infinite;
+}
+
+@keyframes navPulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(0.95);
+  }
+}
+
+/* Add padding to body to account for fixed nav */
+body {
+  padding-bottom: 80px;
+}

@@ -1,9 +1,19 @@
-# PlatformIO
-.pio
-.pioenvs
-.piolibdeps
+# PlatformIO (firmware)
+firmware/.pio
+firmware/.pioenvs
+firmware/.piolibdeps
 .clang_complete
 .gcc-flags.json
+
+# Node.js (app)
+app/node_modules
+app/dist
+app/build
+app/.capacitor
+app/android
+app/ios
+package-lock.json
+yarn.lock
 
 # VS Code
 .vscode/.browse.c_cpp.db*

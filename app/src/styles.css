@@ -1,0 +1,134 @@
+/* Unified button styles for all major action buttons */
+.set-level-btn, .auto-level-btn, .btn-reset-servo, .btn-reset-all {
+  padding: 8px 16px;
+  border: 1px solid var(--color-primary);
+  background: #0f3460;
+  color: var(--color-primary);
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 2px 8px rgba(22, 199, 154, 0.2);
+}
+
+.set-level-btn:hover:not(:disabled), .auto-level-btn:hover:not(:disabled), .btn-reset-servo:hover, .btn-reset-all:hover {
+  background: var(--color-primary);
+  color: #0a0e27;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(22, 199, 154, 0.3);
+}
+
+.set-level-btn:disabled, .auto-level-btn:disabled, .btn-reset-servo:disabled, .btn-reset-all:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.set-level-btn.calibrating, .auto-level-btn.active {
+  background: #ffa500;
+  animation: pulse 1.5s infinite;
+}
+/* styles.css - Global styles for layout, typography, and shared UI elements */
+
+:root {
+  --color-primary: #16c79a;
+  --color-secondary: #764ba2;
+  --color-accent: #4a90e2;
+  --color-bg: #0a0e27;
+  --color-text: #e6e6e6;
+  --color-info: #4fc3f7;
+  --color-danger: #ff6b6b;
+  --font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+  --font-size-base: 16px;
+  --font-size-h2: 2rem;
+  --font-size-h2-mobile: 1.5rem;
+  --container-max-width: 1200px;
+  --container-padding: 1rem;
+  --container-padding-mobile: 0.5rem;
+}
+
+html, body {
+  font-family: var(--font-family);
+  font-size: var(--font-size-base);
+  background: var(--color-bg);
+  color: var(--color-text);
+  margin: 0;
+  padding: 0;
+}
+
+h2 {
+  font-size: var(--font-size-h2);
+  color: var(--color-primary);
+  margin: 0 0 1rem 0;
+  font-weight: 700;
+}
+
+@media (max-width: 768px) {
+  h2 {
+    font-size: var(--font-size-h2-mobile);
+  }
+}
+
+.app-container, .dashboard, .servo-config-page {
+  max-width: var(--container-max-width);
+  margin: 0 auto;
+  padding: var(--container-padding);
+}
+
+@media (max-width: 480px) {
+  .app-container, .dashboard, .servo-config-page {
+    padding: var(--container-padding-mobile);
+  }
+}
+
+.header-buttons {
+  display: flex;
+  gap: 0.75rem;
+  margin-left: auto;
+  flex-wrap: nowrap;
+  justify-content: flex-end;
+}
+
+@media (max-width: 600px) {
+  .header-buttons {
+    justify-content: flex-end;
+    gap: 0.5rem;
+  }
+  .set-level-btn, .auto-level-btn {
+    font-size: 0.85rem;
+    padding: 6px 10px;
+    min-width: 80px;
+  }
+}
+
+@media (max-width: 425px) {
+  .header-buttons {
+    flex-wrap: wrap;
+    margin-left: 0;
+    justify-content: flex-start;
+  }
+}
+
+.dashboard-header, .servo-config-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+button {
+  font-family: inherit;
+  font-size: 1rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: all 0.3s;
+}
+
+/* Utility classes for spacing */
+.mt-1 { margin-top: 1rem; }
+.mb-1 { margin-bottom: 1rem; }
+.mt-2 { margin-top: 2rem; }
+.mb-2 { margin-bottom: 2rem; }
+
+/* Add more as needed for global consistency */

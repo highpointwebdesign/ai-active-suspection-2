@@ -1,0 +1,169 @@
+.dashboard {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem;
+  position: relative;
+}
+
+.rollover-alert {
+  position: fixed;
+  top: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(135deg, #ff4444 0%, #cc0000 100%);
+  color: white;
+  padding: 1rem 3rem;
+  border-radius: 12px;
+  font-size: 1.5rem;
+  font-weight: 700;
+  z-index: 999;
+  box-shadow: 0 8px 32px rgba(255, 68, 68, 0.6);
+  animation: rolloverPulse 1s infinite;
+  text-align: center;
+}
+
+@keyframes rolloverPulse {
+  0%, 100% {
+    box-shadow: 0 8px 32px rgba(255, 68, 68, 0.6);
+    transform: translateX(-50%) scale(1);
+  }
+  50% {
+    box-shadow: 0 12px 48px rgba(255, 68, 68, 0.9);
+    transform: translateX(-50%) scale(1.05);
+  }
+}
+
+.dashboard-header {
+  margin-bottom: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.dashboard-header h2 {
+  font-size: 2rem;
+  color: #16c79a;
+  margin: 0;
+}
+
+.header-buttons {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.set-level-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+.set-level-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+}
+
+.set-level-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.set-level-btn.calibrating {
+  background: linear-gradient(135deg, #ffa500 0%, #ff8c00 100%);
+  animation: calibratingPulse 1.5s infinite;
+}
+
+@keyframes calibratingPulse {
+  0%, 100% {
+    box-shadow: 0 4px 15px rgba(255, 165, 0, 0.4);
+  }
+  50% {
+    box-shadow: 0 6px 25px rgba(255, 165, 0, 0.8);
+  }
+}
+
+.sensor-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.battery-section {
+  background: rgba(15, 52, 96, 0.3);
+  border: 1px solid #0f3460;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.battery-section h3 {
+  margin-top: 0;
+  color: #16c79a;
+  font-size: 1.5rem;
+}
+
+.battery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.config-section {
+  background: rgba(15, 52, 96, 0.3);
+  border: 1px solid #0f3460;
+  border-radius: 12px;
+  padding: 1.5rem;
+}
+
+.config-section h3 {
+  margin-top: 0;
+  color: #16c79a;
+  font-size: 1.5rem;
+}
+
+.config-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.config-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem;
+  background: rgba(22, 199, 154, 0.1);
+  border-radius: 6px;
+}
+
+.config-label {
+  color: #888;
+  font-size: 0.9rem;
+}
+
+.config-value {
+  color: #16c79a;
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+@media (max-width: 768px) {
+  .sensor-grid {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+  }
+  
+  .dashboard-header h2 {
+    font-size: 1.5rem;
+  }
+}
