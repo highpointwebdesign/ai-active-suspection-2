@@ -33,7 +33,7 @@
   }
 }
 
-.dashboard-header {
+.title-header {
   margin-bottom: 1rem;
   display: flex;
   justify-content: space-between;
@@ -42,7 +42,7 @@
   gap: 1rem;
 }
 
-.dashboard-header h2 {
+.title-header h2 {
   font-size: 2rem;
   color: #16c79a;
   margin: 0;
@@ -163,7 +163,7 @@
     gap: 1rem;
   }
   
-  .dashboard-header h2 {
+  .title-header h2 {
     font-size: 1.5rem;
   }
 }

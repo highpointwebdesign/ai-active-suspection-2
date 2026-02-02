@@ -1,20 +1,22 @@
 .info-box {
   text-align: left;
 }
-/* Section placeholders styled like lights */
+
 .servo-section-placeholder {
   background: linear-gradient(135deg, rgba(15, 52, 96, 0.6) 0%, rgba(10, 14, 39, 0.8) 100%);
   border: 2px solid #0f3460;
   border-radius: 12px;
   padding: .5rem;
-  margin: 1.5rem 0;
+  margin-top: .5rem;
+  margin-left: -.5rem;
+  margin-right: -.5rem;
   text-align: center;
 }
 
 .servo-section-placeholder h3 {
   font-size: 1.2rem;
   color: #16c79a;
-  margin-bottom: 1rem;
+  /* margin-bottom: 1rem; */
 }
 
 .servo-section-placeholder .section-content {

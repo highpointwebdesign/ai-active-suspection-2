@@ -44,7 +44,7 @@ function Dashboard({ sensorData, batteryData, batteryConfig, config, onCalibrate
           ⚠️ ROLLOVER DETECTED ⚠️
         </div>
       )}
-      <div className="dashboard-header">
+      <div className="title-header">
         <h2>Dashboard</h2>
         <div className="header-buttons">
           <button 
