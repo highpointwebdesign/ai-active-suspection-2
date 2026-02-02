@@ -2,15 +2,6 @@
   text-align: left;
 }
 
-.info-box--spaced {
-  margin-top: 16px;
-}
-
-.info-box--compact {
-  padding: 0.75rem;
-  margin: 0.75rem 0 1rem;
-}
-
 .servo-section-placeholder {
   background: linear-gradient(135deg, rgba(15, 52, 96, 0.6) 0%, rgba(10, 14, 39, 0.8) 100%);
   border: 2px solid #0f3460;
@@ -25,106 +16,12 @@
 .servo-section-placeholder h3 {
   font-size: 1.2rem;
   color: #16c79a;
-}
-
-.section-title {
-  text-align: left;
-  cursor: pointer;
-  user-select: none;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.section-toggle-icon {
-  font-weight: 600;
-  width: 1rem;
-  display: inline-flex;
-  justify-content: center;
+  /* margin-bottom: 1rem; */
 }
 
 .servo-section-placeholder .section-content {
   font-size: 1.1rem;
   color: #888;
-}
-
-.servo-config-body {
-  padding-top: 0;
-}
-
-.panel-card {
-  background: linear-gradient(135deg, rgba(15, 52, 96, 0.6) 0%, rgba(10, 14, 39, 0.8) 100%);
-  border: 1px solid #4a90e2;
-  border-radius: 12px;
-  padding: 0.75rem;
-  margin: 0.5rem 0 1rem;
-}
-
-.form-panel {
-  text-align: left;
-}
-
-.form-title {
-  font-weight: 600;
-  margin: 0 0 0.5rem 0;
-}
-
-.form-field {
-  margin-bottom: 0.75rem;
-}
-
-.field-label {
-  font-weight: 600;
-  display: block;
-  margin-bottom: 8px;
-  text-align: left;
-}
-
-.form-input,
-.form-select {
-  width: 100%;
-  padding: 8px;
-  border: 1px solid #16c79a;
-  border-radius: 6px;
-  font-size: 14px;
-  background-color: #0f3460;
-  color: #16c79a;
-}
-
-.form-input:focus-visible,
-.form-select:focus-visible {
-  outline: 2px solid rgba(22, 199, 154, 0.6);
-  outline-offset: 2px;
-}
-
-.battery-card {
-  background: linear-gradient(135deg, rgba(15, 52, 96, 0.6) 0%, rgba(10, 14, 39, 0.8) 100%);
-  border: 1px solid #4a90e2;
-  border-radius: 12px;
-  padding: 0.75rem;
-  margin: 0.5rem 0 1rem;
-}
-
-.battery-title {
-  text-align: left;
-  margin: 0 0 0.5rem 0;
-}
-
-.battery-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
-  margin-bottom: 0.75rem;
-}
-
-.battery-toggle-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.field-help {
-  font-size: 14px;
 }
 .servo-config-page {
   max-width: 1200px;

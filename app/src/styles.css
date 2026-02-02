@@ -109,7 +109,7 @@ h2 {
   }
 }
 
-.dashboard-header, .servo-config-header {
+.title-header, .servo-config-header {
   display: flex;
   align-items: center;
   gap: 1rem;

@@ -1,57 +1,98 @@
+/* ============================================================================
+   Bottom Navigation
+   Fixed bottom nav with safe-area support and proper touch targets
+   ============================================================================ */
+
 .bottom-nav {
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
-  background: linear-gradient(135deg, #0f3460 0%, #0a0e27 100%);
-  border-top: 2px solid #16c79a;
+  background: linear-gradient(135deg, var(--color-bg-secondary) 0%, var(--color-bg) 100%);
+  border-top: 2px solid var(--color-primary);
   display: flex;
   justify-content: space-around;
-  padding: 0.75rem 0;
-  z-index: 100;
+  align-items: center;
+  padding: var(--space-3) var(--space-2);
+  padding-bottom: calc(var(--space-3) + var(--safe-area-bottom));
+  padding-left: calc(var(--space-2) + var(--safe-area-left));
+  padding-right: calc(var(--space-2) + var(--safe-area-right));
+  z-index: var(--z-fixed);
+  height: var(--bottom-nav-height);
   box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
 }
 
+/* Nav Items - Proper Touch Targets */
 .nav-item {
   background: transparent;
   border: none;
-  color: #888;
+  color: var(--color-text-muted);
   cursor: pointer;
-  padding: 0.75rem 1.5rem;
-  transition: all 0.3s;
+  padding: var(--space-3) var(--space-4);
+  transition: var(--transition-base);
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
+  min-width: 44px;  /* iOS minimum touch target */
+  min-height: 44px; /* iOS minimum touch target */
+  position: relative;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.nav-item:hover {
-  color: #16c79a;
-  background: rgba(22, 199, 154, 0.1);
-  transform: translateY(-2px);
+/* Hover state (desktop) */
+@media (hover: hover) {
+  .nav-item:hover {
+    color: var(--color-primary);
+    background: rgba(22, 199, 154, 0.1);
+    transform: translateY(-2px);
+  }
 }
 
+/* Active state */
 .nav-item.active {
-  color: #16c79a;
+  color: var(--color-primary);
   background: rgba(22, 199, 154, 0.2);
+}
+
+.nav-item.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 30px;
+  height: 3px;
+  background: var(--color-primary);
+  border-radius: var(--radius-full);
+}
+
+/* Touch feedback */
+.nav-item:active {
+  transform: scale(0.95);
+  background: rgba(22, 199, 154, 0.15);
 }
 
 .nav-item svg {
   width: 24px;
   height: 24px;
+  display: block;
 }
 
+/* Special styling for set-level button */
 .nav-item.set-level-nav {
-  color: #667eea;
+  color: var(--color-secondary);
 }
 
-.nav-item.set-level-nav:hover {
-  color: #764ba2;
-  background: rgba(102, 126, 234, 0.15);
+@media (hover: hover) {
+  .nav-item.set-level-nav:hover {
+    color: var(--color-secondary);
+    background: rgba(102, 126, 234, 0.15);
+  }
 }
 
 .nav-item.set-level-nav.calibrating {
-  color: #16c79a;
+  color: var(--color-primary);
   animation: navPulse 1.5s infinite;
 }
 
@@ -64,9 +105,4 @@
     opacity: 0.7;
     transform: scale(0.95);
   }
-}
-
-/* Add padding to body to account for fixed nav */
-body {
-  padding-bottom: 80px;
 }

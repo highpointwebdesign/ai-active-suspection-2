@@ -454,12 +454,12 @@ function ServoConfig({ config, onUpdateConfig, onBatteryConfigChange, batteryCon
         </div>
       </div>
 
-      <div className="dashboard servo-config-body">
+      <div className="dashboard" style={{paddingTop: '0px'}}>
         
         {/* Section Placeholders */}
         <div className="servo-section-placeholder">
-          <h3 className="section-title" onClick={() => toggleSection('showServo', setShowServo, !showServo)}>
-            <span className="section-toggle-icon">{showServo ? '−' : '+'}</span> Servo Configuration
+          <h3 style={{textAlign:'left', cursor:'pointer', userSelect:'none', display:'flex', alignItems:'center'}} onClick={() => toggleSection('showServo', setShowServo, !showServo)}>
+            <span style={{ fontWeight: 600, marginRight: 8 }}>{showServo ? '−' : '+'}</span> Servo Configuration
           </h3>
           {showServo && (
             <div className="section-content">
@@ -475,7 +475,7 @@ function ServoConfig({ config, onUpdateConfig, onBatteryConfigChange, batteryCon
               <button className="btn-reset-all" onClick={resetAll}>
                 Reset All Servos to Defaults
               </button>
-              <div className="info-box info-box--spaced">
+              <div className="info-box" style={{ marginTop: 16 }}>
                 <strong>Servo Tips:</strong><br />
                 • <span style={{color: '#764ba2', fontWeight: 'bold'}}>Purple Handle (MAX)</span> - Maximum servo angle limit (safety constraint)<br />
                 • <span style={{color: '#16c79a', fontWeight: 'bold'}}>Teal Handle (TRIM)</span> - Static leveling adjustment per corner<br />
@@ -489,22 +489,27 @@ function ServoConfig({ config, onUpdateConfig, onBatteryConfigChange, batteryCon
           )}
         </div>
         <div className="servo-section-placeholder">
-          <h3 className="section-title" onClick={() => toggleSection('showMPU', setShowMPU, !showMPU)}>
-            <span className="section-toggle-icon">{showMPU ? '−' : '+'}</span> Gyro Orientation
+          <h3 style={{textAlign:'left', cursor:'pointer', userSelect:'none', display:'flex', alignItems:'center'}} onClick={() => toggleSection('showMPU', setShowMPU, !showMPU)}>
+            <span style={{ fontWeight: 600, marginRight: 8 }}>{showMPU ? '−' : '+'}</span> Gyro Orientation
           </h3>
           {showMPU && (
             <>
               <div className="section-content">
-                <div className="panel-card">
-                <form onSubmit={e => e.preventDefault()} className="form-panel">
-                  <h3 className="form-title">
+
+                <div style={{   background: 'linear-gradient(135deg, rgba(15, 52, 96, 0.6) 0%, rgba(10, 14, 39, 0.8) 100%)',
+  border: '1px solid #4a90e2',  borderRadius: '12px',  padding: '.5rem',  margin:'.5rem .5rem 1rem .5rem' }}>               
+
+                <form onSubmit={e => e.preventDefault()} style={{ textAlign: 'left' }}>
+                  <h3 htmlFor="mpuOrientation" style={{ fontWeight: 600, display: 'block'  }}>
                     Physical Mounting
                   </h3>
                   <select
                     id="mpuOrientation"
-                    className="orientation-select form-select"
+                    className="orientation-select"
                     value={config?.mpuOrientation ?? 0}
                     onChange={e => onUpdateConfig('mpuOrientation', parseInt(e.target.value))}
+                    style={{ width: '100%', padding: '0.5rem', borderRadius: 6, border: '1px solid #16c79a', backgroundColor: '#0f3460',
+    color: '#16c79a' }}
                   >
                     <option value={0}>Arrow Forward, Chip Up (Default)</option>
                     <option value={1}>Arrow Up, Chip Forward</option>
@@ -517,7 +522,7 @@ function ServoConfig({ config, onUpdateConfig, onBatteryConfigChange, batteryCon
                     <strong>Orientation Guide:</strong><br />
                   </div> */}
                 </form>
-              <div className="info-box info-box--spaced">
+              <div className="info-box" style={{ marginTop: 16 }}>
                 <strong>Calibration Tips:</strong><br />
                 • Select how your MPU6050 sensor is physically mounted. The arrow is printed on the chip. Correct orientation is critical for accurate roll/pitch readings. This is a one-time setup based on your installation.
               </div>
@@ -527,29 +532,33 @@ function ServoConfig({ config, onUpdateConfig, onBatteryConfigChange, batteryCon
           )}
         </div>
         <div className="servo-section-placeholder">
-          <h3 className="section-title" onClick={() => toggleSection('showBattery', setShowBattery, !showBattery)}>
-            <span className="section-toggle-icon">{showBattery ? '−' : '+'}</span> Batteries
+          <h3 style={{cursor:'pointer', userSelect:'none', display:'flex', alignItems:'center'}} onClick={() => toggleSection('showBattery', setShowBattery, !showBattery)}>
+            <span style={{ fontWeight: 600, marginRight: 8 }}>{showBattery ? '−' : '+'}</span> Batteries
           </h3>
           {showBattery && (
             <div className="section-content">
               {[1, 2, 3].map((num) => (
-                <div key={num} className="battery-card">
-                  <h3 className="battery-title">Battery {num}</h3>  
-                  <div className="form-field">
-                    <label className="field-label">Name</label>
+                <div key={num} style={{   background: 'linear-gradient(135deg, rgba(15, 52, 96, 0.6) 0%, rgba(10, 14, 39, 0.8) 100%)',
+  border: '1px solid #4a90e2',  borderRadius: '12px',   padding: '.5rem',  margin:'.5rem .5rem 1rem .5rem'  }}>
+                  <h3 style={{ textAlign: 'left' }}>Battery {num}</h3>  
+                  <div style={{ marginBottom: 10 }}>
+                    <label style={{ fontWeight: 600, display: 'block', marginBottom: 8, textAlign: 'left' }}>Name</label>
                     <input
                       type="text"
                       placeholder={num === 1 ? 'e.g., Main Drive' : num === 2 ? 'e.g., FPV System' : 'e.g., Lights & Accessories'}
-                      className="form-input"
+                      style={{ width: '100%', padding: 8, border: '1px solid #ddd', borderRadius: 4, fontSize: 14,    backgroundColor: '#0f3460',
+    color: '#16c79a' }}
                       value={batteryConfig?.[num - 1]?.name || ''}
                       onChange={e => updateBatteryParamLocal(num, 'name', e.target.value)}
                     />
                   </div>
-                  <div className="battery-grid">
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 10 }}>
                     <div>
-                      <label className="field-label">Cell Count</label>
+                      <label style={{ fontWeight: 600, display: 'block', marginBottom: 8, textAlign:'left' }}>Cell Count</label>
                       <select
-                        className="orientation-select form-select"
+                        className="orientation-select"
+                        style={{width: '100%', padding: 8, border: '1px solid rgb(221, 221, 221)', borderRadius: 4, fontSize: 14,     backgroundColor: '#0f3460',
+    color: '#16c79a'}}
                         value={batteryConfig?.[num - 1]?.cellCount || 3}
                         onChange={e => updateBatteryParamLocal(num, 'cellCount', parseInt(e.target.value))}
                       >
@@ -562,9 +571,11 @@ function ServoConfig({ config, onUpdateConfig, onBatteryConfigChange, batteryCon
                       </select>
                     </div>
                     <div>
-                      <label className="field-label">Cable</label>
+                      <label style={{ fontWeight: 600, display: 'block', marginBottom: 8, textAlign:'left' }}>Cable</label>
                       <select
-                        className="orientation-select form-select"
+                        className="orientation-select"
+                        style={{width: '100%', padding: 8, border: '1px solid rgb(221, 221, 221)', borderRadius: 4, fontSize: 14,     backgroundColor: '#0f3460',
+    color: '#16c79a'}}
                         value={batteryConfig?.[num - 1]?.plugAssignment || 0}
                         onChange={e => updateBatteryParamLocal(num, 'plugAssignment', parseInt(e.target.value))}
                       >
@@ -575,7 +586,7 @@ function ServoConfig({ config, onUpdateConfig, onBatteryConfigChange, batteryCon
                       </select>
                     </div>
                   </div>
-                  <div className="battery-toggle-row">
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                     <label className="toggle-switch">
                       <input
                         type="checkbox"
@@ -584,12 +595,12 @@ function ServoConfig({ config, onUpdateConfig, onBatteryConfigChange, batteryCon
                       />
                       <span className="toggle-slider"></span>
                     </label>
-                    <span className="field-help">Show on Dashboard</span>
+                    <span style={{ fontSize: 14}}>Show on Dashboard</span>
                   </div>
                 </div>
               ))}
 
-              <div className="info-box info-box--compact">
+              <div className="info-box" style={{  padding: '.5rem',  margin:'.5rem .5rem 1rem .5rem'  }}>
                 <strong>Battery Info:</strong><br />
                 Important:<br />
                 • Requires voltage divider circuits on GPIO pins (8:1 ratio recommended)<br />
