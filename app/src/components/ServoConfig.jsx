@@ -3,7 +3,7 @@ import noUiSlider from 'nouislider';
 import 'nouislider/dist/nouislider.css';
 import './ServoConfig.css';
 import '../styles.css';
-import { updateServoParam, calibrateMPU, getSensorData, getBatteryConfig, updateBatteryParam } from '../api/esp32';
+import { updateServoParam, calibrateMPU, getSensorData, updateBatteryParam } from '../api/esp32';
 import BubbleLevel from './BubbleLevel';
 
 const ServoColumn = memo(({ title, servoKey, servo, onReverse, onReset }) => {
@@ -93,7 +93,7 @@ const ServoColumn = memo(({ title, servoKey, servo, onReverse, onReset }) => {
 
 ServoColumn.displayName = 'ServoColumn';
 
-function ServoConfig({ config, onUpdateConfig }) {
+function ServoConfig({ config, onUpdateConfig, onBatteryConfigChange, batteryConfig: batteryConfigProp }) {
   // Collapsible section state, collapsed by default, persisted in localStorage
   const getSectionState = (key, def) => {
     if (typeof window === 'undefined') return def;
@@ -110,29 +110,48 @@ function ServoConfig({ config, onUpdateConfig }) {
     if (typeof window !== 'undefined') localStorage.setItem(key, value);
   };
   // Battery config state
-  const [batteryConfig, setBatteryConfig] = useState([
+  const defaultBatteryConfig = [
     { name: '', cellCount: 3, plugAssignment: 0, showOnDashboard: 1 },
     { name: '', cellCount: 3, plugAssignment: 0, showOnDashboard: 1 },
     { name: '', cellCount: 3, plugAssignment: 0, showOnDashboard: 1 }
-  ]);
-  const [batteryLoading, setBatteryLoading] = useState(true);
+  ];
+  const extractBatteryArray = (cfg) => {
+    if (Array.isArray(cfg)) return cfg;
+    if (cfg && Array.isArray(cfg.batteries)) return cfg.batteries;
+    if (cfg && typeof cfg === 'object') {
+      return [1, 2, 3].map((i) =>
+        cfg[`battery${i}`] ?? cfg[i] ?? cfg[String(i)] ?? cfg[i - 1] ?? null
+      );
+    }
+    return null;
+  };
+  const normalizeBatteryConfig = (cfg) => {
+    const arr = extractBatteryArray(cfg);
+    if (!Array.isArray(arr)) return defaultBatteryConfig;
+    return arr.map((item, idx) => ({
+      ...defaultBatteryConfig[idx],
+      ...(item || {}),
+      showOnDashboard: item?.showOnDashboard === true || Number(item?.showOnDashboard) === 1 ? 1 : 0
+    }));
+  };
+  const [batteryConfig, setBatteryConfig] = useState(defaultBatteryConfig);
   const [batteryError, setBatteryError] = useState('');
 
-  // Load battery config on mount
+  // Sync battery config from App
   useEffect(() => {
-    let mounted = true;
-    setBatteryLoading(true);
-    getBatteryConfig()
-      .then(cfg => { if (mounted) { setBatteryConfig(cfg); setBatteryLoading(false); } })
-      .catch(err => { if (mounted) { setBatteryError('Failed to load battery config'); setBatteryLoading(false); } });
-    return () => { mounted = false; };
-  }, []);
+    if (batteryConfigProp) {
+      const normalized = normalizeBatteryConfig(batteryConfigProp);
+      setBatteryConfig(normalized);
+    }
+  }, [batteryConfigProp]);
 
   // Update handler for battery config
   const updateBatteryParamLocal = (num, param, value) => {
     setBatteryConfig(prev => {
-      const updated = [...prev];
+      const safePrev = Array.isArray(prev) ? prev : defaultBatteryConfig;
+      const updated = [...safePrev];
       updated[num - 1] = { ...updated[num - 1], [param]: value };
+      if (onBatteryConfigChange) onBatteryConfigChange(updated);
       return updated;
     });
     updateBatteryParam(num, param, value).catch(() => setBatteryError('Failed to update battery config'));

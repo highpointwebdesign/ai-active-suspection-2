@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { getHealth, getConfig, calibrateMPU, updateConfigParam, getSensorData } from './api/esp32';
+import { getHealth, getConfig, calibrateMPU, updateConfigParam, getSensorData, getBatteryConfig } from './api/esp32';
 import Settings from './components/Settings';
 import Dashboard from './components/Dashboard';
 import Tuning from './components/Tuning';
@@ -14,6 +14,31 @@ function App() {
   const [config, setConfig] = useState(null);
   const [sensorData, setSensorData] = useState(null);
   const [batteryData, setBatteryData] = useState([]);
+  const defaultBatteryConfig = [
+    { name: '', cellCount: 3, plugAssignment: 0, showOnDashboard: 1 },
+    { name: '', cellCount: 3, plugAssignment: 0, showOnDashboard: 1 },
+    { name: '', cellCount: 3, plugAssignment: 0, showOnDashboard: 1 }
+  ];
+  const extractBatteryArray = (cfg) => {
+    if (Array.isArray(cfg)) return cfg;
+    if (cfg && Array.isArray(cfg.batteries)) return cfg.batteries;
+    if (cfg && typeof cfg === 'object') {
+      return [1, 2, 3].map((i) =>
+        cfg[`battery${i}`] ?? cfg[i] ?? cfg[String(i)] ?? cfg[i - 1] ?? null
+      );
+    }
+    return null;
+  };
+  const normalizeBatteryConfig = (cfg) => {
+    const arr = extractBatteryArray(cfg);
+    if (!Array.isArray(arr)) return defaultBatteryConfig;
+    return arr.map((item, idx) => ({
+      ...defaultBatteryConfig[idx],
+      ...(item || {}),
+      showOnDashboard: item?.showOnDashboard === true || Number(item?.showOnDashboard) === 1 ? 1 : 0
+    }));
+  };
+  const [batteryConfig, setBatteryConfig] = useState(defaultBatteryConfig);
   const [showSettings, setShowSettings] = useState(false);
   const [rolloverDetected, setRolloverDetected] = useState(false);
   const [currentPage, setCurrentPage] = useState('dashboard');
@@ -33,6 +58,20 @@ function App() {
       clearInterval(healthCheckInterval);
     };
   }, []);
+
+  useEffect(() => {
+    let mounted = true;
+    const loadBatteryConfig = async () => {
+      try {
+        const cfg = await getBatteryConfig();
+        if (mounted) setBatteryConfig(normalizeBatteryConfig(cfg));
+      } catch (error) {
+        // keep defaults if fetch fails
+      }
+    };
+    if (connected) loadBatteryConfig();
+    return () => { mounted = false; };
+  }, [connected]);
 
   // Sensor data polling only on dashboard page
   useEffect(() => {
@@ -136,6 +175,7 @@ function App() {
               <Dashboard 
                 sensorData={sensorData}
                 batteryData={batteryData}
+                batteryConfig={batteryConfig}
                 config={config}
                 onCalibrate={handleCalibrate}
                 rolloverDetected={rolloverDetected}
@@ -153,6 +193,8 @@ function App() {
               <ServoConfig 
                 config={config}
                 onUpdateConfig={handleUpdateConfig}
+                onBatteryConfigChange={setBatteryConfig}
+                batteryConfig={batteryConfig}
               />
             )}
           </>

@@ -3,9 +3,15 @@ import SensorGauge from './SensorGauge';
 import BatteryDisplay from './BatteryDisplay';
 import './Dashboard.css';
 
-function Dashboard({ sensorData, batteryData, config, onCalibrate, rolloverDetected }) {
+function Dashboard({ sensorData, batteryData, batteryConfig, config, onCalibrate, rolloverDetected }) {
   const [calibrating, setCalibrating] = useState(false);
   const [resettingGimbal, setResettingGimbal] = useState(false);
+  const visibleBatteries = (batteryData || [])
+    .map((voltage, index) => ({ voltage, index }))
+    .filter(({ index }) => {
+      if (!Array.isArray(batteryConfig)) return true;
+      return !!batteryConfig[index]?.showOnDashboard;
+    });
 
   const handleSetLevel = async () => {
     setCalibrating(true);
@@ -77,16 +83,16 @@ function Dashboard({ sensorData, batteryData, config, onCalibrate, rolloverDetec
         />
       </div>
 
-      {batteryData && batteryData.length > 0 && (
+      {batteryData && batteryData.length > 0 && visibleBatteries.length > 0 && (
         <div className="battery-section">
           <h3>Battery Status</h3>
           <div className="battery-grid">
-            {batteryData.map((voltage, index) => (
-              <BatteryDisplay
-                key={index}
-                label={`Battery ${index + 1}`}
-                voltage={voltage}
-              />
+            {visibleBatteries.map(({ voltage, index }) => (
+                <BatteryDisplay
+                  key={index}
+                  label={batteryConfig?.[index]?.name || `Battery ${index + 1}`}
+                  voltage={voltage}
+                />
             ))}
           </div>
         </div>
