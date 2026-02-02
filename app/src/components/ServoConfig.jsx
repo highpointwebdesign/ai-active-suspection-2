@@ -502,8 +502,9 @@ function ServoConfig({ config, onUpdateConfig, onBatteryConfigChange, batteryCon
                     id="mpuOrientation"
                     className="orientation-select"
                     value={config?.mpuOrientation ?? 0}
-                    onChange={e => updateConfigParam('mpuOrientation', parseInt(e.target.value))}
-                    style={{ width: '100%', padding: '0.5rem', borderRadius: 6, border: '1px solid #16c79a', marginBottom: 12 }}
+                    onChange={e => onUpdateConfig('mpuOrientation', parseInt(e.target.value))}
+                    style={{ width: '100%', padding: '0.5rem', borderRadius: 6, border: '1px solid #16c79a', marginBottom: 12,     backgroundColor: '#0f3460',
+    color: '#16c79a' }}
                   >
                     <option value={0}>Arrow Forward, Chip Up (Default)</option>
                     <option value={1}>Arrow Up, Chip Forward</option>
@@ -539,7 +540,8 @@ function ServoConfig({ config, onUpdateConfig, onBatteryConfigChange, batteryCon
                     <input
                       type="text"
                       placeholder={num === 1 ? 'e.g., Main Drive' : num === 2 ? 'e.g., FPV System' : 'e.g., Lights & Accessories'}
-                      style={{ width: '100%', padding: 8, border: '1px solid #ddd', borderRadius: 4, fontSize: 14 }}
+                      style={{ width: '100%', padding: 8, border: '1px solid #ddd', borderRadius: 4, fontSize: 14,    backgroundColor: '#0f3460',
+    color: '#16c79a' }}
                       value={batteryConfig?.[num - 1]?.name || ''}
                       onChange={e => updateBatteryParamLocal(num, 'name', e.target.value)}
                     />
@@ -549,7 +551,8 @@ function ServoConfig({ config, onUpdateConfig, onBatteryConfigChange, batteryCon
                       <label style={{ fontWeight: 600, display: 'block', marginBottom: 8, textAlign:'left' }}>Cell Count</label>
                       <select
                         className="orientation-select"
-                        style={{width: '100%', padding: 8, border: '1px solid rgb(221, 221, 221)', borderRadius: 4, fontSize: 14}}
+                        style={{width: '100%', padding: 8, border: '1px solid rgb(221, 221, 221)', borderRadius: 4, fontSize: 14,     backgroundColor: '#0f3460',
+    color: '#16c79a'}}
                         value={batteryConfig?.[num - 1]?.cellCount || 3}
                         onChange={e => updateBatteryParamLocal(num, 'cellCount', parseInt(e.target.value))}
                       >
@@ -562,17 +565,18 @@ function ServoConfig({ config, onUpdateConfig, onBatteryConfigChange, batteryCon
                       </select>
                     </div>
                     <div>
-                      <label style={{ fontWeight: 600, display: 'block', marginBottom: 8, textAlign:'left' }}>Plug Assignment</label>
+                      <label style={{ fontWeight: 600, display: 'block', marginBottom: 8, textAlign:'left' }}>Cable</label>
                       <select
                         className="orientation-select"
-                        style={{width: '100%', padding: 8, border: '1px solid rgb(221, 221, 221)', borderRadius: 4, fontSize: 14}}
+                        style={{width: '100%', padding: 8, border: '1px solid rgb(221, 221, 221)', borderRadius: 4, fontSize: 14,     backgroundColor: '#0f3460',
+    color: '#16c79a'}}
                         value={batteryConfig?.[num - 1]?.plugAssignment || 0}
                         onChange={e => updateBatteryParamLocal(num, 'plugAssignment', parseInt(e.target.value))}
                       >
                         <option value={0}>None</option>
-                        <option value={1}>Plug A (GPIO 34)</option>
-                        <option value={2}>Plug B (GPIO 35)</option>
-                        <option value={3}>Plug C (GPIO 32)</option>
+                        <option value={1}>Plug A</option>
+                        <option value={2}>Plug B</option>
+                        <option value={3}>Plug C</option>
                       </select>
                     </div>
                   </div>
