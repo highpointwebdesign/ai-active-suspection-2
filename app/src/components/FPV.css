@@ -1,22 +1,27 @@
 .fpv-page {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 1rem;
+  padding: .5rem;
   padding-bottom: 5rem;
+}
+
+.fpv-header {
+  margin-bottom: 1rem;
 }
 
 .fpv-page h2 {
   font-size: 2rem;
   color: #16c79a;
-  margin-bottom: 1rem;
+  margin: 0;
 }
 
 .fpv-section {
-  background: rgba(15, 52, 96, 0.3);
-  border: 1px solid #0f3460;
-  border-radius: 12px;
-  padding: 1.5rem;
-  margin-bottom: 1.5rem;
+    background: linear-gradient(135deg, rgba(15, 52, 96, 0.6) 0%, rgba(10, 14, 39, 0.8) 100%);
+    border: 2px solid #0f3460;
+    border-radius: 12px;
+    padding: 1.5rem;
+    transition: all 0.3s;
+    margin-bottom: 1.5rem
 }
 
 .fpv-section h3 {
@@ -239,9 +244,15 @@ input:checked + .toggle-slider:before {
 }
 
 /* Mobile responsiveness */
+@media (max-width: 768px) {
+  .fpv-page h2 {
+    font-size: 1.5rem;
+  }
+}
+
 @media (max-width: 480px) {
   .fpv-page {
-    padding: 0.75rem;
+    padding: 0.5rem;
   }
 
   .fpv-section {

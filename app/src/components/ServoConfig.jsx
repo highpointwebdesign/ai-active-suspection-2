@@ -434,27 +434,28 @@ function ServoConfig({ config, onUpdateConfig, onBatteryConfigChange, batteryCon
         </div>
       )}
 
-      <div className="dashboard">
-        <div className="dashboard-header">
-          <h2>Settings</h2>
-          <div className="header-buttons">
-            <button 
-              className={`set-level-btn ${calibrating ? 'calibrating' : ''}`}
-              onClick={handleSetLevel}
-              disabled={calibrating || autoLeveling}
-            >
-              {calibrating ? 'Calibrating...' : 'Set Level'}
-            </button>
-            <button 
-              className={`auto-level-btn ${autoLeveling ? 'active' : ''}`}
-              onClick={handleAutoLevel}
-              disabled={calibrating || autoLeveling}
-            >
-              {autoLeveling ? levelingStatus : 'Auto Level'}
-            </button>
-          </div>
+      <div className="dashboard-header">
+        <h2>Settings</h2>
+        <div className="header-buttons">
+          <button 
+            className={`set-level-btn ${calibrating ? 'calibrating' : ''}`}
+            onClick={handleSetLevel}
+            disabled={calibrating || autoLeveling}
+          >
+            {calibrating ? 'Calibrating...' : 'Set as Level'}
+          </button>
+          <button 
+            className={`auto-level-btn ${autoLeveling ? 'active' : ''}`}
+            onClick={handleAutoLevel}
+            disabled={calibrating || autoLeveling}
+          >
+            {autoLeveling ? levelingStatus : 'Auto Level'}
+          </button>
         </div>
+      </div>
 
+      <div className="dashboard">
+        
         {/* Section Placeholders */}
         <div className="servo-section-placeholder">
           <h3 style={{textAlign:'left', cursor:'pointer', userSelect:'none', display:'flex', alignItems:'center'}} onClick={() => toggleSection('showServo', setShowServo, !showServo)}>

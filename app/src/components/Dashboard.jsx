@@ -52,7 +52,7 @@ function Dashboard({ sensorData, batteryData, batteryConfig, config, onCalibrate
             onClick={handleSetLevel}
             disabled={calibrating}
           >
-            {calibrating ? 'Calibrating...' : 'Set Level'}
+            {calibrating ? 'Calibrating...' : 'Set as Level'}
           </button>
           <button 
             className={`set-level-btn ${resettingGimbal ? 'calibrating' : ''}`}

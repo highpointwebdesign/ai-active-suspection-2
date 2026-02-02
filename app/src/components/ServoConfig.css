@@ -6,7 +6,7 @@
   background: linear-gradient(135deg, rgba(15, 52, 96, 0.6) 0%, rgba(10, 14, 39, 0.8) 100%);
   border: 2px solid #0f3460;
   border-radius: 12px;
-  padding: 1rem 1.5rem;
+  padding: .5rem;
   margin: 1.5rem 0;
   text-align: center;
 }
@@ -22,10 +22,10 @@
   color: #888;
 }
 .servo-config-page {
-  padding: 1rem;
-  padding-bottom: 5rem;
   max-width: 1200px;
   margin: 0 auto;
+  padding: 1rem;
+  padding-bottom: 5rem;
 }
 
 

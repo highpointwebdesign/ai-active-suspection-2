@@ -1,14 +1,18 @@
 .lights-page {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 1rem;
+  padding: .5rem;
   padding-bottom: 5rem;
+}
+
+.lights-header {
+  margin-bottom: 1rem;
 }
 
 .lights-page h2 {
   font-size: 2rem;
   color: #16c79a;
-  margin-bottom: 1rem;
+  margin: 0;
 }
 
 .coming-soon {
@@ -22,4 +26,16 @@
 .coming-soon p {
   font-size: 1.2rem;
   color: #888;
+}
+
+@media (max-width: 768px) {
+  .lights-page h2 {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .lights-page h2 {
+    font-size: 1.5rem;
+  }
 }

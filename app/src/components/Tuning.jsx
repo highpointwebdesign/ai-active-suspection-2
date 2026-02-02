@@ -110,7 +110,9 @@ function Tuning({ config, onUpdateConfig }) {
 
   return (
     <div className="tuning-page">
-      <h2>Tuning</h2>
+      <div className="tuning-header">
+        <h2>Tuning</h2>
+      </div>
       
       <div className="tuning-controls">
         {parameters.map(param => (
