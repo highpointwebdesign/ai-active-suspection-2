@@ -114,6 +114,9 @@ function FPV() {
   };
 
   const handleAutoToggle = async () => {
+    // TODO: When I toggle the switch to on/checked, the Power Mode label automatically changes to full power. 
+    // That behavior is incorrect. The FULL POWER should only be in effect when the system detects movement 
+    // for more than 3 seconds. We will need an API call made to the firmware to check for a flag.
     const newAutoMode = !autoMode;
     setAutoMode(newAutoMode);
     localStorage.setItem('fpv_auto_mode', newAutoMode.toString());
@@ -170,11 +173,6 @@ function FPV() {
               <span className="toggle-slider"></span>
             </label>
           </div>
-          <p className="auto-mode-description">
-            {autoMode 
-              ? 'Automatically enables full power when movement is detected'
-              : 'Manual control of power mode'}
-          </p>
           {helpVisible.autoMode && (
             <div className="help-text">Automatically detects vehicle movement via gyroscope and accelerometer. When movement is detected, full power is automatically enabled for optimal video quality. Power returns to low mode after 3 seconds of inactivity to prevent overheating.</div>
           )}
