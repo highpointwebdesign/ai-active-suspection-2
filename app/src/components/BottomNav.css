@@ -38,6 +38,7 @@
   min-height: 44px; /* iOS minimum touch target */
   position: relative;
   -webkit-tap-highlight-color: transparent;
+  line-height: 1;
 }
 
 /* Hover state (desktop) */
@@ -71,6 +72,13 @@
 .nav-item:active {
   transform: scale(0.95);
   background: rgba(22, 199, 154, 0.15);
+}
+
+/* Ensure icons don't cause height issues */
+.nav-item i,
+.nav-item svg {
+  line-height: 1;
+  display: block;
 }
 
 .nav-item svg {

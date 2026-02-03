@@ -8,7 +8,7 @@ function BottomNav({ currentPage, onNavigate, onSettings }) {
         onClick={() => onNavigate('dashboard')}
         title="Dashboard"
       >
-        <i class="fa-regular fa-house fa-xl"></i>
+        <i class="fa-regular fa-house"></i>
       </button>
 
       <button 
@@ -16,7 +16,7 @@ function BottomNav({ currentPage, onNavigate, onSettings }) {
         onClick={() => onNavigate('tuning')}
         title="Tuning"
       >
-        <i class="fa-solid fa-sliders fa-xl"></i>
+        <i class="fa-solid fa-sliders"></i>
       </button>
 
       <button 
@@ -24,7 +24,7 @@ function BottomNav({ currentPage, onNavigate, onSettings }) {
         onClick={() => onNavigate('lights')}
         title="Lights"
       >
-        <i class="fa-regular fa-lightbulb fa-xl"></i>
+        <i class="fa-regular fa-lightbulb"></i>
       </button>
 
       <button 
@@ -32,7 +32,7 @@ function BottomNav({ currentPage, onNavigate, onSettings }) {
         onClick={() => onNavigate('fpv')}
         title="FPV"
       >
-        <i className="fa-solid fa-glasses fa-xl"></i>
+        <i className="fa-solid fa-glasses"></i>
       </button>
 
       <button 
@@ -40,7 +40,7 @@ function BottomNav({ currentPage, onNavigate, onSettings }) {
         onClick={() => onNavigate('servo')}
         title="Settings"
       >
-        <i class="fa-solid fa-gear fa-xl"></i>
+        <i class="fa-solid fa-gear"></i>
       </button>
 
       {/* Network settings button moved to header */}
