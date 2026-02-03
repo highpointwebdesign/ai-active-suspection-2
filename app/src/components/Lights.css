@@ -1,41 +1,35 @@
 .lights-page {
-  max-width: 1200px;
+  max-width: var(--container-max-width);
   margin: 0 auto;
-  padding: 1rem;
-  padding-bottom: 5rem;
+  padding: var(--space-4);
+  padding-bottom: var(--space-10);
 }
 
 .lights-header {
-  margin-bottom: 1rem;
+  margin-bottom: var(--space-4);
 }
 
 .lights-page h2 {
-  font-size: 2rem;
-  color: #16c79a;
+  font-size: var(--font-size-2xl);
+  color: var(--color-primary);
   margin: 0;
 }
 
 .coming-soon {
-  background: linear-gradient(135deg, rgba(15, 52, 96, 0.6) 0%, rgba(10, 14, 39, 0.8) 100%);
-  border: 2px solid #0f3460;
-  border-radius: 12px;
-  padding: 3rem;
+  background: color-mix(in srgb, var(--color-bg-secondary) 30%, transparent);
+  border: 2px solid var(--color-bg-secondary);
+  border-radius: var(--radius-lg);
+  padding: var(--space-8);
   text-align: center;
 }
 
 .coming-soon p {
-  font-size: 1.2rem;
-  color: #888;
+  font-size: var(--font-size-lg);
+  color: var(--color-text-muted);
 }
 
-@media (max-width: 768px) {
+@media (min-width: 768px) {
   .lights-page h2 {
-    font-size: 1.5rem;
-  }
-}
-
-@media (max-width: 768px) {
-  .lights-page h2 {
-    font-size: 1.5rem;
+    font-size: var(--font-size-3xl);
   }
 }

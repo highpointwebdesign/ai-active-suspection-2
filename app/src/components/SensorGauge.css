@@ -1,13 +1,13 @@
 .sensor-gauge {
-  background: linear-gradient(135deg, rgba(15, 52, 96, 0.6) 0%, rgba(10, 14, 39, 0.8) 100%);
-  border: 2px solid #0f3460;
-  border-radius: 12px;
-  padding: 1.5rem;
-  transition: all 0.3s;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--color-bg-secondary) 60%, transparent) 0%, color-mix(in srgb, var(--color-bg) 80%, transparent) 100%);
+  border: 2px solid var(--color-bg-secondary);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  transition: var(--transition-base);
 }
 
 .sensor-gauge.warning {
-  border-color: #ff6b6b;
+  border-color: var(--color-danger);
   box-shadow: 0 0 20px rgba(255, 107, 107, 0.3);
   animation: pulse 2s infinite;
 }
@@ -22,9 +22,9 @@
 }
 
 .gauge-label {
-  font-size: 1rem;
-  color: #888;
-  margin-bottom: 0.5rem;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-2);
   text-transform: uppercase;
   letter-spacing: 1px;
 }
@@ -32,25 +32,25 @@
 .gauge-display {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: var(--space-3);
 }
 
 .gauge-value {
-  font-size: 2.5rem;
+  font-size: var(--font-size-3xl);
   font-weight: 700;
-  color: #16c79a;
-  font-family: 'Courier New', monospace;
+  color: var(--color-primary);
+  font-family: var(--font-family-mono);
   text-align: center;
 }
 
 .sensor-gauge.warning .gauge-value {
-  color: #ff6b6b;
+  color: var(--color-danger);
 }
 
 .gauge-unit {
-  font-size: 2rem;
-  color: #888;
-  margin-left: 0.25rem;
+  font-size: var(--font-size-2xl);
+  color: var(--color-text-muted);
+  margin-left: var(--space-1);
   vertical-align: super;
 }
 
@@ -61,8 +61,8 @@
 .gauge-bar-track {
   position: relative;
   height: 8px;
-  background: rgba(15, 52, 96, 0.5);
-  border-radius: 4px;
+  background: color-mix(in srgb, var(--color-bg-secondary) 50%, transparent);
+  border-radius: var(--radius-sm);
   overflow: hidden;
 }
 
@@ -73,7 +73,7 @@
   bottom: 0;
   width: 2px;
   background: rgba(255, 255, 255, 0.3);
-  z-index: 2;
+  z-index: var(--z-base);
 }
 
 .gauge-bar-fill {
@@ -81,28 +81,28 @@
   left: 0;
   top: 0;
   bottom: 0;
-  background: linear-gradient(90deg, #16c79a 0%, #11d3bc 100%);
-  border-radius: 4px;
-  transition: width 0.3s ease;
+  background: linear-gradient(90deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+  border-radius: var(--radius-sm);
+  transition: width var(--transition-base);
 }
 
 .sensor-gauge.warning .gauge-bar-fill {
-  background: linear-gradient(90deg, #ff6b6b 0%, #ff4444 100%);
+  background: linear-gradient(90deg, var(--color-danger) 0%, #ff4444 100%);
 }
 
 .gauge-range {
   display: flex;
   justify-content: space-between;
-  font-size: 0.75rem;
-  color: #666;
+  font-size: var(--font-size-xs);
+  color: color-mix(in srgb, var(--color-text-muted) 80%, transparent);
 }
 
-@media (max-width: 768px) {
+@media (min-width: 768px) {
   .gauge-value {
-    font-size: 2rem;
+    font-size: calc(var(--font-size-3xl) * 1.1);
   }
-  
+
   .sensor-gauge {
-    padding: 1rem;
+    padding: var(--space-5);
   }
 }

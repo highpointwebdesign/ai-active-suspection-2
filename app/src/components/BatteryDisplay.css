@@ -1,64 +1,64 @@
 .battery-display {
-  background: rgba(15, 52, 96, 0.4);
-  border: 2px solid #0f3460;
-  border-radius: 8px;
-  padding: 1rem;
-  transition: all 0.3s;
+  background: color-mix(in srgb, var(--color-bg-secondary) 40%, transparent);
+  border: 2px solid var(--color-bg-secondary);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  transition: var(--transition-base);
 }
 
 .battery-display.warning {
-  border-color: #ffa500;
+  border-color: var(--color-warning);
   box-shadow: 0 0 15px rgba(255, 165, 0, 0.3);
 }
 
 .battery-display.critical {
-  border-color: #ff4444;
-  box-shadow: 0 0 15px rgba(255, 68, 68, 0.3);
+  border-color: var(--color-danger);
+  box-shadow: 0 0 15px rgba(255, 107, 107, 0.3);
   animation: criticalPulse 1.5s infinite;
 }
 
 @keyframes criticalPulse {
   0%, 100% {
-    box-shadow: 0 0 15px rgba(255, 68, 68, 0.3);
+    box-shadow: 0 0 15px rgba(255, 107, 107, 0.3);
   }
   50% {
-    box-shadow: 0 0 25px rgba(255, 68, 68, 0.6);
+    box-shadow: 0 0 25px rgba(255, 107, 107, 0.6);
   }
 }
 
 .battery-label {
-  font-size: 0.85rem;
-  color: #888;
-  margin-bottom: 0.5rem;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-2);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
 .battery-voltage {
-  font-size: 1.5rem;
+  font-size: var(--font-size-xl);
   font-weight: 700;
-  color: #16c79a;
-  font-family: 'Courier New', monospace;
-  margin-bottom: 0.5rem;
+  color: var(--color-primary);
+  font-family: var(--font-family-mono);
+  margin-bottom: var(--space-2);
 }
 
 .battery-display.warning .battery-voltage {
-  color: #ffa500;
+  color: var(--color-warning);
 }
 
 .battery-display.critical .battery-voltage {
-  color: #ff4444;
+  color: var(--color-danger);
 }
 
 .battery-bar-container {
-  margin: 0.5rem 0;
+  margin: var(--space-2) 0;
 }
 
 .battery-bar-track {
   position: relative;
   height: 10px;
-  background: rgba(15, 52, 96, 0.5);
-  border-radius: 5px;
+  background: color-mix(in srgb, var(--color-bg-secondary) 50%, transparent);
+  border-radius: var(--radius-sm);
   overflow: hidden;
 }
 
@@ -67,22 +67,22 @@
   left: 0;
   top: 0;
   bottom: 0;
-  background: linear-gradient(90deg, #16c79a 0%, #11d3bc 100%);
-  border-radius: 5px;
+  background: linear-gradient(90deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+  border-radius: var(--radius-sm);
   transition: width 0.5s ease;
 }
 
 .battery-display.warning .battery-bar-fill {
-  background: linear-gradient(90deg, #ffa500 0%, #ff8c00 100%);
+  background: linear-gradient(90deg, var(--color-warning) 0%, #ff8c00 100%);
 }
 
 .battery-display.critical .battery-bar-fill {
-  background: linear-gradient(90deg, #ff4444 0%, #dc143c 100%);
+  background: linear-gradient(90deg, var(--color-danger) 0%, #dc143c 100%);
 }
 
 .battery-percentage {
-  font-size: 0.85rem;
-  color: #888;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
   text-align: right;
-  margin-top: 0.25rem;
+  margin-top: var(--space-1);
 }
