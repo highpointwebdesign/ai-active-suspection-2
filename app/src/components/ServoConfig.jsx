@@ -467,7 +467,7 @@ function ServoConfig({ config, onUpdateConfig, onBatteryConfigChange, batteryCon
         >
           <summary className="section-toggle">
             Servo Configuration
-            <span className="section-toggle-icon">{showServo ? '−' : '+'}</span>
+            <i className="fa-solid fa-chevron-down section-toggle-icon"></i>
           </summary>
           <div className="section-content">
             {/* Bubble Level Indicator */}
@@ -501,7 +501,7 @@ function ServoConfig({ config, onUpdateConfig, onBatteryConfigChange, batteryCon
         >
           <summary className="section-toggle">
             Gyro Orientation
-            <span className="section-toggle-icon">{showMPU ? '−' : '+'}</span>
+            <i className="fa-solid fa-chevron-down section-toggle-icon"></i>
           </summary>
           <div className="section-content">
             {/* <div className="config-card"> */}
@@ -540,7 +540,7 @@ function ServoConfig({ config, onUpdateConfig, onBatteryConfigChange, batteryCon
         >
           <summary className="section-toggle">
             Batteries
-            <span className="section-toggle-icon">{showBattery ? '−' : '+'}</span>
+            <i className="fa-solid fa-chevron-down section-toggle-icon"></i>
           </summary>
           <div className="section-content">
             {[1, 2, 3].map((num) => (

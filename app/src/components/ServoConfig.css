@@ -583,7 +583,8 @@ input:checked + .toggle-slider:before {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--space-3) 0;
+  /* padding: var(--space-3) 0; */
+  margin: calc(var(--space-1) * -1);
   background: transparent;
   border: none;
   border-radius: 0;
