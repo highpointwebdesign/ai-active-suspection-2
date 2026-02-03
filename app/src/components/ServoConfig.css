@@ -210,7 +210,7 @@
 
 @media (min-width: 768px) {
   .servo-config-header h2 {
-    font-size: var(--font-size-3xl);
+    font-size: var(--font-size-2xl);
   }
 }
 
