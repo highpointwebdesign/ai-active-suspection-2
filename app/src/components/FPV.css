@@ -50,8 +50,8 @@
 
 /* Power Control */
 .auto-mode-control {
-  margin-bottom: var(--space-5);
-  padding: var(--space-4);
+  margin-bottom: var(--space-3);
+  padding: var(--space-2);
   background: color-mix(in srgb, var(--color-bg) 20%, transparent);
   border-radius: var(--radius-md);
 }
@@ -60,7 +60,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: var(--space-2);
+  margin-bottom: 0;
 }
 
 .auto-mode-label-wrapper {
@@ -154,7 +154,7 @@ input:checked + .toggle-slider:before {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: var(--space-4);
+  padding: var(--space-1);
   background: color-mix(in srgb, var(--color-bg) 30%, transparent);
   border-radius: var(--radius-md);
 }
