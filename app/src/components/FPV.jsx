@@ -174,7 +174,7 @@ function FPV() {
             </label>
           </div>
           {helpVisible.autoMode && (
-            <div className="help-text">Automatically detects vehicle movement via gyroscope and accelerometer. When movement is detected, full power is automatically enabled for optimal video quality. Power returns to low mode after 3 seconds of inactivity to prevent overheating.</div>
+            <div className="help-text">Automatically activates full power when movement is detected for optimal video quality. Power returns to low mode after 3 seconds of inactivity to prevent overheating. Not recommended when line-of-sight is obstructed.</div>
           )}
         </div>
         
@@ -207,11 +207,11 @@ function FPV() {
           {resetting ? 'Resetting Gimbal...' : 'Reset Gimbal'}
         </button>
       </div>
-      <div className="info-box">
+      {/* <div className="info-box">
         <strong>Info:</strong><br />
         • Full power mode provides maximum video quality but generates more heat. Enable during driving, disable during idle to prevent overheating.<br />
         • Reset gimbal orientation to default position if the camera angle becomes misaligned.<br />
-      </div>
+      </div> */}
     </div>
   );
 }
