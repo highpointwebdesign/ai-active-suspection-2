@@ -43,7 +43,7 @@
 }
 
 .title-header h2 {
-  font-size: var(--font-size-2xl);
+  font-size: var(--font-size-xl);
   color: var(--color-primary);
   margin: 0;
 }
