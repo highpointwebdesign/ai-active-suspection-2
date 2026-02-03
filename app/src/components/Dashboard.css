@@ -91,11 +91,25 @@
   }
 }
 
-.sensor-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: var(--space-4);
+.telemetry-section {
+  background: color-mix(in srgb, var(--color-bg-secondary) 30%, transparent);
+  border: 1px solid var(--color-bg-secondary);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+  padding-top: var(--space-2);
   margin-bottom: var(--space-6);
+}
+
+.telemetry-section h3 {
+  margin-top: 0;
+  color: var(--color-primary);
+  font-size: var(--font-size-xl);
+}
+
+.telemetry-section .sensor-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-4);
 }
 
 .battery-section {
@@ -103,6 +117,7 @@
   border: 1px solid var(--color-bg-secondary);
   border-radius: var(--radius-lg);
   padding: var(--space-5);
+  padding-top: var(--space-2);
   margin-bottom: var(--space-6);
 }
 
@@ -123,6 +138,7 @@
   border: 1px solid var(--color-bg-secondary);
   border-radius: var(--radius-lg);
   padding: var(--space-5);
+  padding-top: var(--space-2);
 }
 
 .config-section h3 {
@@ -141,9 +157,13 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: var(--space-3);
-  background: color-mix(in srgb, var(--color-primary) 10%, transparent);
-  border-radius: var(--radius-md);
+  padding: var(--space-3);  
+  background: linear-gradient(135deg, 
+  color-mix(in srgb, var(--color-bg-secondary) 60%, transparent) 0%, 
+  color-mix(in srgb, var(--color-bg) 80%, transparent) 100%);
+  border: 2px solid var(--color-bg-secondary);
+  border-radius: var(--radius-lg);
+  transition: var(--transition-base);
 }
 
 .config-label {
@@ -162,8 +182,7 @@
     padding: var(--space-5);
   }
 
-  .sensor-grid {
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  .telemetry-section .sensor-grid {
     gap: var(--space-5);
   }
 

@@ -141,8 +141,8 @@ function FPV() {
   };
 
   return (
-    <div className="fpv-page">
-      <div className="fpv-header">
+    <div className="dashboard">
+      <div className="title-header">
         <h2>FPV Control</h2>
       </div>
       

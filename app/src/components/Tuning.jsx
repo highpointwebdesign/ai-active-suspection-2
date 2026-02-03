@@ -109,8 +109,8 @@ function Tuning({ config, onUpdateConfig }) {
   ];
 
   return (
-    <div className="tuning-page">
-      <div className="tuning-header">
+    <div className="dashboard">
+      <div className="title-header">
         <h2>Tuning</h2>
       </div>
       

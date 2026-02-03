@@ -78,6 +78,7 @@ h2 {
 @media (max-width: 480px) {
   .app-container, .dashboard, .servo-config-page {
     padding: var(--container-padding-mobile);
+    margin-top: -1rem;
   }
 }
 

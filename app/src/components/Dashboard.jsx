@@ -64,23 +64,26 @@ function Dashboard({ sensorData, batteryData, batteryConfig, config, onCalibrate
         </div>
       </div>
 
-      <div className="sensor-grid">
-        <SensorGauge
-          label="Roll"
-          value={sensorData?.roll || 0}
-          unit="°"
-          min={-90}
-          max={90}
-          warningThreshold={45}
-        />
-        <SensorGauge
-          label="Pitch"
-          value={sensorData?.pitch || 0}
-          unit="°"
-          min={-90}
-          max={90}
-          warningThreshold={45}
-        />
+      <div className="telemetry-section">
+        <h3>Telemetry</h3>
+        <div className="sensor-grid">
+          <SensorGauge
+            label="Roll"
+            value={sensorData?.roll || 0}
+            unit="°"
+            min={-90}
+            max={90}
+            warningThreshold={45}
+          />
+          <SensorGauge
+            label="Pitch"
+            value={sensorData?.pitch || 0}
+            unit="°"
+            min={-90}
+            max={90}
+            warningThreshold={45}
+          />
+        </div>
       </div>
 
       {batteryData && batteryData.length > 0 && visibleBatteries.length > 0 && (

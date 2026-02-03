@@ -65,8 +65,11 @@ const ServoColumn = memo(({ title, servoKey, servo, onReverse, onReset }) => {
   }, [servo.min, servo.max, servo.trim, servoKey]);
 
   return (
-    <div className="servo-column">
-      <h3 style={{textAlign:'left'}}>{title}</h3>
+    <div className="dashboard">
+      <div className="title-header">
+        <h2>Settings</h2>
+      </div>
+      
       <div className="sliders-container">
         <div className="slider-wrapper-combined">
           <div ref={sliderRef} className="nouislider-combined"></div>

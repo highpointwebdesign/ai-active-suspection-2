@@ -2,12 +2,12 @@ import './Lights.css';
 
 function Lights() {
   return (
-    <div className="lights-page">
-      <div className="lights-header">
+    <div className="dashboard">
+      <div className="title-header">
         <h2>Lighting</h2>
       </div>
       <div className="coming-soon">
-        <p>Light configuration coming soon...</p>
+        <h3>Coming soon...</h3>
       </div>
     </div>
   );
