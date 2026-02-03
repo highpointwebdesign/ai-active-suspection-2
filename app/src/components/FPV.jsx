@@ -11,6 +11,7 @@ function FPV() {
   });
   const [resetting, setResetting] = useState(false);
   const [isMoving, setIsMoving] = useState(false);
+  const [helpVisible, setHelpVisible] = useState({});
   
   const movementTimerRef = useRef(null);
   const idleTimerRef = useRef(null);
@@ -140,6 +141,10 @@ function FPV() {
     }
   };
 
+  const toggleHelp = (param) => {
+    setHelpVisible(prev => ({ ...prev, [param]: !prev[param] }));
+  };
+
   return (
     <div className="dashboard">
       <div className="title-header">
@@ -152,7 +157,10 @@ function FPV() {
         
         <div className="auto-mode-control">
           <div className="auto-mode-header">
-            <span className="auto-mode-label">Auto Mode</span>
+            <div className="auto-mode-label-wrapper">
+              <span className="auto-mode-label">Auto Mode</span>
+              <span className="help-icon" onClick={() => toggleHelp('autoMode')}>?</span>
+            </div>
             <label className="toggle-switch">
               <input 
                 type="checkbox" 
@@ -167,13 +175,16 @@ function FPV() {
               ? 'Automatically enables full power when movement is detected'
               : 'Manual control of power mode'}
           </p>
+          {helpVisible.autoMode && (
+            <div className="help-text">Automatically detects vehicle movement via gyroscope and accelerometer. When movement is detected, full power is automatically enabled for optimal video quality. Power returns to low mode after 3 seconds of inactivity to prevent overheating.</div>
+          )}
         </div>
         
         <div className="power-control">
           <div className="power-status">
             <span className="status-label">Power Mode:</span>
             <span className={`status-value ${powerMode ? 'active' : 'idle'}`}>
-              {powerMode ? 'FULL POWER' : 'STANDBY'}
+              {powerMode ? 'FULL POWER' : 'LOW POWER'}
             </span>
           </div>
           <button 
