@@ -1,6 +1,0 @@
-SPIFFS
-bblanchon/ArduinoJson@^7.2.0
-https://github.com/me-no-dev/ESPAsyncWebServer.git
-Wire
-https://github.com/me-no-dev/AsyncTCP.git
-electroniccats/MPU6050@^1.0.0
