@@ -67,7 +67,7 @@ ai-active-suspension-2/
 ├── HARDWARE.md                 # Wiring and assembly
 ├── CONFIG_API.md               # Configuration reference
 ├── ARCHITECTURE.md             # System design
-├── INDEX.md                    # This file
+├── index.md                    # This file
 │
 ├── platformio.ini              # PlatformIO build config
 ├── package.json                # Project metadata
@@ -287,7 +287,7 @@ For detailed parameter explanation, see [CONFIG_API.md](CONFIG_API.md#parameter-
 - **HARDWARE.md** (800 lines) - Wiring and assembly
 - **CONFIG_API.md** (700 lines) - Configuration reference
 - **ARCHITECTURE.md** (600 lines) - System design
-- **INDEX.md** (this file) - Navigation guide
+- **index.md** (this file) - Navigation guide
 
 ### Source Code Files
 - **src/main.cpp** (150 lines) - Application entry point
@@ -344,7 +344,7 @@ All documentation is kept in sync with the firmware code. When you see version m
 ## 📚 Document Map
 
 ```
-You are here (INDEX.md)
+You are here (index.md)
        ↓
        ├─→ QUICKSTART.md (Getting started)
        │      ↓
