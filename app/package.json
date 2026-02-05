@@ -10,7 +10,7 @@
     "serve": "node server.js",
     "serve:pwa": "npm run build && node server.js",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d dist",
+    "deploy": "gh-pages -d dist -b pwa-install",
     "cap:init": "cap init",
     "cap:add": "cap add android",
     "cap:sync": "cap sync",
