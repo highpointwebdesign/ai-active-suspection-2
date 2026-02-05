@@ -1,0 +1,25 @@
+# Jekyll configuration for GitHub Pages
+title: ESP32 Active Suspension Simulator
+description: Complete documentation for ESP32-based active suspension control system
+theme: jekyll-theme-cayman
+
+# Build settings
+markdown: kramdown
+plugins:
+  - jekyll-relative-links
+
+# GitHub Pages settings
+relative_links:
+  enabled: true
+  collections: false
+
+# Include markdown files
+include:
+  - ARCHITECTURE.md
+  - CONFIG_API.md
+  - DELIVERY.md
+  - HARDWARE.md
+  - MANIFEST.md
+  - QUICKSTART.md
+  - QUICK_REFERENCE.md
+  - README.md

@@ -1,4 +1,5 @@
 # PlatformIO (firmware)
+.pio
 firmware/.pio
 firmware/.pioenvs
 firmware/.piolibdeps
