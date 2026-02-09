@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { getHealth, getConfig, calibrateMPU, updateConfigParam, getSensorData, getBatteryConfig } from './api/esp32';
+import { getConfig, calibrateMPU, updateConfigParam, getBatteryConfig, subscribeToSensorData, subscribeToBatteryData, getWebSocketStatus } from './api/esp32';
 import Settings from './components/Settings';
 import Dashboard from './components/Dashboard';
 import Tuning from './components/Tuning';
@@ -42,22 +42,30 @@ function App() {
   const [showSettings, setShowSettings] = useState(false);
   const [rolloverDetected, setRolloverDetected] = useState(false);
   const [currentPage, setCurrentPage] = useState('dashboard');
-  const pollingIntervalRef = useRef(null);
   const configLoadedRef = useRef(false);
 
+  // Monitor WebSocket connection status
   useEffect(() => {
-    // Test connection on mount
-    checkConnection();
-    
-    // Periodic health check every 3 seconds
-    const healthCheckInterval = setInterval(() => {
-      checkConnection();
-    }, 3000);
-    
-    return () => {
-      clearInterval(healthCheckInterval);
+    const checkStatus = () => {
+      const status = getWebSocketStatus();
+      setConnected(status.connected);
     };
-  }, []);
+    
+    // Check initially
+    checkStatus();
+    
+    // Load config on first connection
+    if (!configLoadedRef.current && connected) {
+      getConfig().then(configData => {
+        setConfig(configData);
+        configLoadedRef.current = true;
+      }).catch(() => {});
+    }
+    
+    // Check status periodically
+    const interval = setInterval(checkStatus, 1000);
+    return () => clearInterval(interval);
+  }, [connected]);
 
   useEffect(() => {
     let mounted = true;
@@ -73,50 +81,36 @@ function App() {
     return () => { mounted = false; };
   }, [connected]);
 
-  // Sensor data polling only on dashboard page
+  // Subscribe to sensor and battery data via WebSocket
   useEffect(() => {
-    if (currentPage !== 'dashboard') {
-      return;
-    }
+    const unsubscribeSensor = subscribeToSensorData((data) => {
+      setSensorData({
+        roll: data.roll,
+        pitch: data.pitch,
+        yaw: data.yaw,
+        verticalAccel: data.verticalAccel
+      });
+      
+      // Detect rollover: roll > 90° or pitch > 90° indicates vehicle is upside down or on its side
+      const isRollover = Math.abs(data.roll) > 90 || Math.abs(data.pitch) > 90;
+      setRolloverDetected(isRollover);
+    });
     
-    // Start polling for sensor data every 500ms
-    pollingIntervalRef.current = setInterval(async () => {
-      try {
-        const data = await getSensorData();
-        setSensorData({
-          roll: data.roll,
-          pitch: data.pitch,
-          yaw: data.yaw,
-          verticalAccel: data.verticalAccel
-        });
-        setBatteryData(data.batteries);
-        
-        // Detect rollover: roll > 90° or pitch > 90° indicates vehicle is upside down or on its side
-        const isRollover = Math.abs(data.roll) > 90 || Math.abs(data.pitch) > 90;
-        setRolloverDetected(isRollover);
-      } catch (error) {
-        // Silently fail - connection indicator handles this
-      }
-    }, 500); // Poll every 500ms (2 updates/second)
+    const unsubscribeBattery = subscribeToBatteryData((data) => {
+      setBatteryData(data.voltages || []);
+    });
     
     return () => {
-      if (pollingIntervalRef.current) {
-        clearInterval(pollingIntervalRef.current);
-      }
+      unsubscribeSensor();
+      unsubscribeBattery();
     };
-  }, [currentPage]);
+  }, []);
 
-  const checkConnection = async () => {
+  const handleReconnect = async () => {
     try {
-      const health = await getHealth();
-      setConnected(health.status === 'ok');
-      
-      // Load config only once
-      if (!configLoadedRef.current) {
-        const configData = await getConfig();
-        setConfig(configData);
-        configLoadedRef.current = true;
-      }
+      // Reload config on reconnect
+      const configData = await getConfig();
+      setConfig(configData);
     } catch (error) {
       setConnected(false);
       // Silently fail for periodic checks, don't spam console
@@ -124,8 +118,8 @@ function App() {
   };
 
   const handleIpChange = () => {
-    // Reconnect with new IP
-    checkConnection();
+    // Config will reload on next connection
+    configLoadedRef.current = false;
   };
 
   const handleCalibrate = async () => {
@@ -202,7 +196,7 @@ function App() {
           <div className="connection-error">
             <h2>Unable to Connect</h2>
             <p>Make sure you're connected to the ESP32 or check the IP address in settings</p>
-            <button onClick={checkConnection}>Retry Connection</button>
+            <button onClick={handleReconnect}>Retry Connection</button>
             <button onClick={() => setShowSettings(true)}>Open Network Settings</button>
           </div>
         )}

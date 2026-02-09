@@ -1,5 +1,5 @@
-const CACHE_NAME = 'suspension-control-v1';
-const FONT_CACHE = 'suspension-fonts-v1';
+const CACHE_NAME = 'suspension-control-v2';
+const FONT_CACHE = 'suspension-fonts-v2';
 const urlsToCache = [
   './',
   './index.html',
@@ -40,47 +40,62 @@ self.addEventListener('activate', event => {
 
 // Fetch event - serve from cache, fallback to network
 self.addEventListener('fetch', event => {
+  const { request } = event;
+
+  if (request.method !== 'GET') {
+    return;
+  }
+
+  if (!request.url.startsWith('http')) {
+    return;
+  }
+
   // Don't cache API requests to ESP32
-  if (event.request.url.includes('/api') || event.request.url.includes('/ws')) {
-    event.respondWith(fetch(event.request));
+  if (request.url.includes('/api') || request.url.includes('/ws')) {
+    event.respondWith(fetch(request));
     return;
   }
 
   // Font files - cache first, always
-  if (event.request.url.includes('.woff2') || event.request.url.includes('.woff')) {
+  if (request.url.includes('.woff2') || request.url.includes('.woff')) {
     event.respondWith(
-      caches.match(event.request)
-        .then(response => response || fetch(event.request))
+      caches.match(request)
+        .then(response => response || fetch(request))
     );
     return;
   }
 
+  // Navigation requests - network first, fallback to cached index
+  if (request.mode === 'navigate') {
+    event.respondWith(
+      fetch(request)
+        .then(response => {
+          const responseToCache = response.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(request, responseToCache));
+          return response;
+        })
+        .catch(() => caches.match('./index.html'))
+    );
+    return;
+  }
+
+  // Other requests - cache first, no HTML fallback
   event.respondWith(
-    caches.match(event.request)
+    caches.match(request)
       .then(response => {
-        // Return cached response if available
         if (response) {
           return response;
         }
 
-        return fetch(event.request).then(response => {
-          // Clone the response
-          if (!response || response.status !== 200 || response.type === 'error') {
-            return response;
+        return fetch(request).then(networkResponse => {
+          if (!networkResponse || networkResponse.status !== 200 || networkResponse.type === 'error') {
+            return networkResponse;
           }
 
-          const responseToCache = response.clone();
-          caches.open(CACHE_NAME)
-            .then(cache => {
-              cache.put(event.request, responseToCache);
-            });
-
-          return response;
+          const responseToCache = networkResponse.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(request, responseToCache));
+          return networkResponse;
         });
-      })
-      .catch(() => {
-        // Return offline page if needed
-        return caches.match('./index.html');
       })
   );
 });

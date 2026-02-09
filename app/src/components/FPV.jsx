@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { getSensorData, setFpvAutoMode } from '../api/esp32';
+import { subscribeToSensorData, setFpvAutoMode } from '../api/esp32';
 import './FPV.css';
 
 function FPV() {
@@ -15,16 +15,10 @@ function FPV() {
   
   const movementTimerRef = useRef(null);
   const idleTimerRef = useRef(null);
-  const pollingIntervalRef = useRef(null);
 
-  // Monitor gyro for movement when in auto mode
+  // Monitor gyro for movement when in auto mode via WebSocket
   useEffect(() => {
     if (!autoMode) {
-      // Clear polling when auto mode is off
-      if (pollingIntervalRef.current) {
-        clearInterval(pollingIntervalRef.current);
-        pollingIntervalRef.current = null;
-      }
       if (movementTimerRef.current) {
         clearTimeout(movementTimerRef.current);
         movementTimerRef.current = null;
@@ -37,61 +31,54 @@ function FPV() {
       return;
     }
 
-    // Poll sensor data every 200ms when auto mode is active
-    pollingIntervalRef.current = setInterval(async () => {
-      try {
-        const data = await getSensorData();
-        const roll = Math.abs(data.roll || 0);
-        const pitch = Math.abs(data.pitch || 0);
-        const accel = Math.abs(data.verticalAccel || 0);
-        
-        // Detect movement: significant roll, pitch, or acceleration
-        const movementDetected = roll > 5 || pitch > 5 || accel > 0.2;
-        
-        if (movementDetected) {
-          // Clear idle timer
-          if (idleTimerRef.current) {
-            clearTimeout(idleTimerRef.current);
-            idleTimerRef.current = null;
-          }
-          
-          // Start movement timer if not already moving
-          if (!isMoving && !movementTimerRef.current) {
-            movementTimerRef.current = setTimeout(() => {
-              // After 1 second of continuous movement, enable power
-              setIsMoving(true);
-              setPowerMode(true);
-              console.log('Auto: Movement detected - enabling full power');
-              movementTimerRef.current = null;
-            }, 1000);
-          }
-        } else {
-          // Clear movement timer
-          if (movementTimerRef.current) {
-            clearTimeout(movementTimerRef.current);
-            movementTimerRef.current = null;
-          }
-          
-          // Start idle timer if currently moving
-          if (isMoving && !idleTimerRef.current) {
-            idleTimerRef.current = setTimeout(() => {
-              // After 3 seconds of no movement, disable power
-              setIsMoving(false);
-              setPowerMode(false);
-              console.log('Auto: Movement stopped - switching to standby');
-              idleTimerRef.current = null;
-            }, 3000);
-          }
+    // Subscribe to WebSocket sensor data
+    const unsubscribe = subscribeToSensorData((data) => {
+      const roll = Math.abs(data.roll || 0);
+      const pitch = Math.abs(data.pitch || 0);
+      const accel = Math.abs(data.verticalAccel || 0);
+      
+      // Detect movement: significant roll, pitch, or acceleration
+      const movementDetected = roll > 5 || pitch > 5 || accel > 0.2;
+      
+      if (movementDetected) {
+        // Clear idle timer
+        if (idleTimerRef.current) {
+          clearTimeout(idleTimerRef.current);
+          idleTimerRef.current = null;
         }
-      } catch (error) {
-        console.error('Failed to read sensor data:', error);
+        
+        // Start movement timer if not already moving
+        if (!isMoving && !movementTimerRef.current) {
+          movementTimerRef.current = setTimeout(() => {
+            // After 1 second of continuous movement, enable power
+            setIsMoving(true);
+            setPowerMode(true);
+            console.log('Auto: Movement detected - enabling full power');
+            movementTimerRef.current = null;
+          }, 1000);
+        }
+      } else {
+        // Clear movement timer
+        if (movementTimerRef.current) {
+          clearTimeout(movementTimerRef.current);
+          movementTimerRef.current = null;
+        }
+        
+        // Start idle timer if currently moving
+        if (isMoving && !idleTimerRef.current) {
+          idleTimerRef.current = setTimeout(() => {
+            // After 3 seconds of no movement, disable power
+            setIsMoving(false);
+            setPowerMode(false);
+            console.log('Auto: Movement stopped - switching to standby');
+            idleTimerRef.current = null;
+          }, 3000);
+        }
       }
-    }, 200);
+    });
 
     return () => {
-      if (pollingIntervalRef.current) {
-        clearInterval(pollingIntervalRef.current);
-      }
+      unsubscribe();
       if (movementTimerRef.current) {
         clearTimeout(movementTimerRef.current);
       }

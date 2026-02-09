@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getSensorData } from '../api/esp32';
+import { subscribeToSensorData } from '../api/esp32';
 import './BubbleLevel.css';
 
 function BubbleLevel() {
@@ -8,31 +8,16 @@ function BubbleLevel() {
   const [isLevel, setIsLevel] = useState(false);
 
   useEffect(() => {
-    let intervalId;
+    const unsubscribe = subscribeToSensorData((data) => {
+      setRoll(data.roll || 0);
+      setPitch(data.pitch || 0);
+      
+      // Check if level (within ±2 degrees)
+      const level = Math.abs(data.roll || 0) < 2 && Math.abs(data.pitch || 0) < 2;
+      setIsLevel(level);
+    });
 
-    const fetchSensorData = async () => {
-      try {
-        const data = await getSensorData();
-        setRoll(data.roll || 0);
-        setPitch(data.pitch || 0);
-        
-        // Check if level (within ±2 degrees)
-        const level = Math.abs(data.roll || 0) < 2 && Math.abs(data.pitch || 0) < 2;
-        setIsLevel(level);
-      } catch (error) {
-        console.error('Failed to fetch sensor data:', error);
-      }
-    };
-
-    // Initial fetch
-    fetchSensorData();
-
-    // Poll every 500ms for smoother updates and reduced backend load
-    intervalId = setInterval(fetchSensorData, 500);
-
-    return () => {
-      if (intervalId) clearInterval(intervalId);
-    };
+    return () => unsubscribe();
   }, []);
 
   // Calculate bubble position

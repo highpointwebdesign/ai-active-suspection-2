@@ -56,22 +56,40 @@ public:
     ws.textAll(message);
   }
   
+  // Store latest sensor/battery data
+  struct {
+    float roll = NAN, pitch = NAN, yaw = NAN, verticalAccel = NAN;
+    float battery1 = 0, battery2 = 0, battery3 = 0;
+  } latestData;
+  
+  // Send combined sensor and battery data to all connected clients
+  void sendTelemetry() {
+    String json = "{\"type\":\"telemetry\",\"roll\":" + String(latestData.roll, 1) + 
+                  ",\"pitch\":" + String(latestData.pitch, 1) + 
+                  ",\"yaw\":" + String(latestData.yaw, 1) + 
+                  ",\"verticalAccel\":" + String(latestData.verticalAccel, 2) + 
+                  ",\"voltages\":[" + 
+                  String(latestData.battery1, 2) + "," + 
+                  String(latestData.battery2, 2) + "," + 
+                  String(latestData.battery3, 2) + "]}";
+    ws.textAll(json);
+  }
+  
   // Send sensor data to all connected clients
   void sendSensorData(float roll, float pitch, float yaw, float verticalAccel) {
-    String json = "{\"type\":\"sensor\",\"roll\":" + String(roll, 1) + 
-                  ",\"pitch\":" + String(pitch, 1) + 
-                  ",\"yaw\":" + String(yaw, 1) + 
-                  ",\"verticalAccel\":" + String(verticalAccel, 2) + "}";
-    ws.textAll(json);
+    latestData.roll = roll;
+    latestData.pitch = pitch;
+    latestData.yaw = yaw;
+    latestData.verticalAccel = verticalAccel;
+    sendTelemetry();
   }
   
   // Send battery voltage data to all connected clients
   void sendBatteryData(float battery1, float battery2, float battery3) {
-    String json = "{\"type\":\"battery\",\"voltages\":[" + 
-                  String(battery1, 2) + "," + 
-                  String(battery2, 2) + "," + 
-                  String(battery3, 2) + "]}";
-    ws.textAll(json);
+    latestData.battery1 = battery1;
+    latestData.battery2 = battery2;
+    latestData.battery3 = battery3;
+    sendTelemetry();
   }
   
   // Set calibration callback for MPU6050 recalibration
@@ -301,14 +319,14 @@ private:
     // API endpoint to reset config to defaults
     server.on("/api/reset", HTTP_POST, [this](AsyncWebServerRequest *request) {
       storageManager->resetToDefaults();
-      sendStatus("⚙️ Settings reset to factory defaults");
+      sendStatus("Settings reset to factory defaults");
       request->send(200, "application/json", "{\"status\":\"success\"}");
     });
     
     // API endpoint to recalibrate MPU6050
     server.on("/api/calibrate", HTTP_POST, [this](AsyncWebServerRequest *request) {
       if (calibrationCallback) {
-        sendStatus("🔄 Starting recalibration...");
+        sendStatus("Starting recalibration...");
         calibrationCallback();
         request->send(200, "application/json", "{\"status\":\"success\"}");
       } else {
