@@ -263,9 +263,9 @@ void loop() {
     pwmOutputs.setChannel(2, rl, servoConfig.rearLeft);
     pwmOutputs.setChannel(3, rr, servoConfig.rearRight);
     
-    // Broadcast sensor data to web clients (every 500ms = 2Hz)
+    // Broadcast sensor data to web clients (every 200ms = 5Hz)
     static unsigned long lastBroadcast = 0;
-    if (currentTime - lastBroadcast >= 500) {
+    if (currentTime - lastBroadcast >= 200) {
       if (mpuConnected) {
         webServer.sendSensorData(roll, pitch, yaw, verticalAccel);
         webServer.setSensorData(roll, pitch, yaw, verticalAccel); // Store for HTTP polling

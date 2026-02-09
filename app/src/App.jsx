@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { getConfig, calibrateMPU, updateConfigParam, getBatteryConfig, subscribeToSensorData, subscribeToBatteryData, getWebSocketStatus } from './api/esp32';
+import { getConfig, calibrateMPU, updateConfigParam, subscribeToSensorData, subscribeToBatteryData, getWebSocketStatus } from './api/esp32';
 import Settings from './components/Settings';
 import Dashboard from './components/Dashboard';
 import Tuning from './components/Tuning';
@@ -58,6 +58,10 @@ function App() {
     if (!configLoadedRef.current && connected) {
       getConfig().then(configData => {
         setConfig(configData);
+        // Extract battery config from the combined config response
+        if (configData && configData.batteries) {
+          setBatteryConfig(normalizeBatteryConfig(configData.batteries));
+        }
         configLoadedRef.current = true;
       }).catch(() => {});
     }
@@ -67,19 +71,8 @@ function App() {
     return () => clearInterval(interval);
   }, [connected]);
 
-  useEffect(() => {
-    let mounted = true;
-    const loadBatteryConfig = async () => {
-      try {
-        const cfg = await getBatteryConfig();
-        if (mounted) setBatteryConfig(normalizeBatteryConfig(cfg));
-      } catch (error) {
-        // keep defaults if fetch fails
-      }
-    };
-    if (connected) loadBatteryConfig();
-    return () => { mounted = false; };
-  }, [connected]);
+  // Battery config is now loaded as part of the main config, so we can remove the second useEffect
+  // The battery config will be updated whenever the main config loads
 
   // Subscribe to sensor and battery data via WebSocket
   useEffect(() => {

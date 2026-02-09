@@ -86,7 +86,7 @@
   box-shadow:
     0 0 10px rgba(102, 126, 234, 0.6),
     inset -2px -2px 4px rgba(255, 255, 255, 0.3);
-  transition: transform 0.1s ease-out;
+  transition: transform 0.2s ease-out;
   border: 2px solid rgba(255, 255, 255, 0.3);
 }
 
