@@ -43,15 +43,13 @@ const connectWebSocket = () => {
         // Handle Blob data from WebSocket
         if (event.data instanceof Blob) {
           event.data.text().then(text => {
-            console.log('[WS Raw]', text);  // Debug: see raw message
             try {
-              // Replace all variations of NaN/nan with 0
+              // Replace all variations of NaN/nan with null for valid JSON
               const sanitized = text
-                .replace(/:\s*nan\b/gi, ': 0')
-                .replace(/:\s*NaN\b/g, ': 0')
-                .replace(/:\s*-?inf\b/gi, ': 0');
+                .replace(/:\s*nan\b/gi, ': null')
+                .replace(/:\s*NaN\b/g, ': null')
+                .replace(/:\s*-?inf\b/gi, ': null');
               const data = JSON.parse(sanitized);
-              console.log('[WS Parsed]', data);  // Debug: see parsed data
               const type = data.type;
               if (wsSubscribers[type]) {
                 wsSubscribers[type].forEach(callback => callback(data));
@@ -62,14 +60,12 @@ const connectWebSocket = () => {
             }
           });
         } else {
-          console.log('[WS Raw]', event.data);  // Debug: see raw message
-          // Replace all variations of NaN/nan with 0
+          // Replace all variations of NaN/nan with null for valid JSON
           const sanitized = event.data
-            .replace(/:\s*nan\b/gi, ': 0')
-            .replace(/:\s*NaN\b/g, ': 0')
-            .replace(/:\s*-?inf\b/gi, ': 0');
+            .replace(/:\s*nan\b/gi, ': null')
+            .replace(/:\s*NaN\b/g, ': null')
+            .replace(/:\s*-?inf\b/gi, ': null');
           const data = JSON.parse(sanitized);
-          console.log('[WS Parsed]', data);  // Debug: see parsed data
           const type = data.type;
           if (wsSubscribers[type]) {
             wsSubscribers[type].forEach(callback => callback(data));

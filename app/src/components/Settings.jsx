@@ -11,7 +11,7 @@ function Settings({ onClose, onIpChange }) {
   useEffect(() => {
     const interval = setInterval(() => {
       setWsStatus(getWebSocketStatus());
-    }, 500);
+    }, 250);
     return () => clearInterval(interval);
   }, []);
 
