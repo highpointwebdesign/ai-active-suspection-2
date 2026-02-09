@@ -107,13 +107,13 @@ void setup() {
   
   mpuConnected = mpu.testConnection();
   if (!mpuConnected) {
-    Serial.println("⚠️  MPU6050 connection failed - using simulated sensor data for testing");
+    Serial.println("MPU6050 connection failed - using simulated sensor data for testing");
     Serial.println("Check wiring: SDA=GPIO21, SCL=GPIO22, VCC=3.3V, GND=GND");
     Serial.println("MPU6050 should be at I2C address 0x68");
     webServer.init(storageManager);
-    webServer.sendStatus("⚠️ Development Mode: MPU6050 not connected (using simulated data)");
+    webServer.sendStatus("Development Mode: MPU6050 not connected (using simulated data)");
   } else {
-    Serial.println("✓ MPU6050 initialized successfully");
+    Serial.println("MPU6050 initialized successfully");
     Serial.println("MPU6050 found at I2C address 0x68");
   }
   
@@ -135,14 +135,14 @@ void setup() {
         webServer.sendStatus(msg);
       });
     } else {
-      webServer.sendStatus("⚠️ Cannot calibrate - MPU6050 not connected");
+      webServer.sendStatus("Cannot calibrate - MPU6050 not connected");
     }
   });
   
   // Set up orientation callback for web interface
   webServer.setOrientationCallback([&](uint8_t orientation) {
     sensorFusion.setOrientation(orientation);
-    webServer.sendStatus("✓ MPU6050 orientation updated");
+    webServer.sendStatus("MPU6050 orientation updated");
   });
   
   // Set up MPU status callback for web interface
@@ -179,7 +179,7 @@ void setup() {
   Serial.println("Battery monitoring ADC pins configured");
   
   // Send final ready status
-  webServer.sendStatus("✓ System ready!");
+  webServer.sendStatus("System ready");
   
   Serial.println("Setup complete!");
 }
@@ -213,7 +213,7 @@ void loop() {
       // Update connection status - sensor is working!
       if (!mpuConnected) {
         mpuConnected = true;
-        Serial.println("✓ MPU6050 now responding - sensor online");
+        Serial.println("MPU6050 now responding - sensor online");
       }
     } else {
       // I2C error - use neutral values for safety
@@ -227,7 +227,7 @@ void loop() {
       // Mark sensor as disconnected
       if (mpuConnected) {
         mpuConnected = false;
-        Serial.println("⚠️ MPU6050 stopped responding");
+        Serial.println("MPU6050 stopped responding");
       }
     }
     

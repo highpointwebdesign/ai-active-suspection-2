@@ -44,6 +44,10 @@ const connectWebSocket = () => {
         if (event.data instanceof Blob) {
           event.data.text().then(text => {
             try {
+              // Skip non-JSON messages (status messages are plain text)
+              if (!text.trim().startsWith('{')) {
+                return;
+              }
               // Replace all variations of NaN/nan with null for valid JSON
               const sanitized = text
                 .replace(/:\s*nan\b/gi, ': null')
@@ -60,6 +64,10 @@ const connectWebSocket = () => {
             }
           });
         } else {
+          // Skip non-JSON messages (status messages are plain text)
+          if (!event.data.trim().startsWith('{')) {
+            return;
+          }
           // Replace all variations of NaN/nan with null for valid JSON
           const sanitized = event.data
             .replace(/:\s*nan\b/gi, ': null')

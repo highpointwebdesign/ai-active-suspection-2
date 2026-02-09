@@ -119,7 +119,7 @@ public:
   
   template<typename StatusCallback>
   void calibrate(MPU6050& mpu, StatusCallback statusFn, uint16_t samples = 100) {
-    statusFn("🔄 Calibrating IMU... Keep vehicle still!");
+    statusFn("Calibrating IMU... Keep vehicle still!");
     Serial.println("Calibrating IMU... Keep vehicle still!");
     
     float rollSum = 0.0f;
@@ -147,7 +147,7 @@ public:
     rollOffset = rollSum / samples;
     pitchOffset = pitchSum / samples;
     
-    String completeMsg = "✓ Calibration complete! Roll: " + String(rollOffset, 1) + "°, Pitch: " + String(pitchOffset, 1) + "°";
+    String completeMsg = "Calibration complete! Roll: " + String(rollOffset, 1) + "°, Pitch: " + String(pitchOffset, 1) + "°";
     statusFn(completeMsg);
     
     Serial.print("Calibration complete! Roll offset: ");
