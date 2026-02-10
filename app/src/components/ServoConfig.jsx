@@ -606,7 +606,8 @@ function ServoConfig({ config, onUpdateConfig, onBatteryConfigChange, batteryCon
               • Requires voltage divider circuits on GPIO pins (8:1 ratio recommended)<br />
               • Each plug can only be assigned to one battery<br />
               • Dashboard will only show batteries with "Show on Dashboard" enabled<br />
-              • Plug A = GPIO 34, Plug B = GPIO 35, Plug C = GPIO 32 (ADC pins)
+              • Plug A = GPIO 34, Plug B = GPIO 35, Plug C = GPIO 32 (ADC pins)<br />
+              • See Web Socket Details <a href="/stats.html" className="link">here</a>.
             </div>
           </div>
         </details>

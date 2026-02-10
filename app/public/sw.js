@@ -1,4 +1,5 @@
-const CACHE_NAME = 'suspension-control-v2';
+const VERSION = '0.0.10';
+const CACHE_NAME = 'suspension-control-v10';
 const FONT_CACHE = 'suspension-fonts-v2';
 const urlsToCache = [
   './',

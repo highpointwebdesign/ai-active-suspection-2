@@ -24,8 +24,10 @@ function BubbleLevel() {
   // Roll moves bubble left/right, pitch moves bubble up/down
   // Scale factor: 1 degree = 3 pixels of movement
   // Add 8px offset to X to correct centering issue
-  const bubbleX = roll * 3 + 8;
-  const bubbleY = pitch * 3;
+  // Snap to center when within ±5° threshold (dead zone effect)
+  const isWithinThreshold = Math.abs(roll) < 5 && Math.abs(pitch) < 5;
+  const bubbleX = isWithinThreshold ? 8 : (roll * 3 + 8);
+  const bubbleY = isWithinThreshold ? 0 : (pitch * 3);
 
   return (
     <div className="bubble-level-container">

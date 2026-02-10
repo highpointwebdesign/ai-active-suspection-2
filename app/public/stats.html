@@ -1,0 +1,89 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+    <meta name="theme-color" content="#2196F3">
+    <meta name="description" content="ESP32 Health Monitor">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="ESP32">
+    <title>ESP32 Dashboard</title>
+    <link rel="manifest" href="./manifest.json">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" type="image/svg+xml" href="./icon.svg">
+    <link rel="apple-touch-icon" href="./icon.svg">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>ESP32 Health Monitor</h1>
+            <div class="connection-status" id="connectionStatus">
+                <span class="status-dot"></span>
+                <span class="status-text">Connecting...</span>
+            </div>
+        </header>
+
+        <main>
+            <div class="card">
+                <div class="card-header">
+                    <h2>System Status</h2>
+                    <span class="last-update" id="lastUpdate">Never</span>
+                </div>
+                <div class="card-body">
+                    <div class="status-item">
+                        <span class="label">API Status:</span>
+                        <span class="value" id="apiStatus">-</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="label">MPU6050 Sensor:</span>
+                        <span class="value sensor-status" id="sensorStatus">-</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h2>Connection Info</h2>
+                </div>
+                <div class="card-body">
+                    <div class="info-item">
+                        <span class="label">Endpoint:</span>
+                        <span class="value" id="endpoint">ws://192.168.87.23:80/ws</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Update Rate:</span>
+                        <span class="value">Real-time WebSocket</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Total Messages:</span>
+                        <span class="value" id="requestCount">0</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Failed Connections:</span>
+                        <span class="value" id="failedCount">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card error-card" id="errorCard" style="display: none;">
+                <div class="card-header">
+                    <h2>Error</h2>
+                </div>
+                <div class="card-body">
+                    <p id="errorMessage"></p>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <button id="installBtn" class="install-btn" style="display: none;">
+                Install App
+            </button>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
