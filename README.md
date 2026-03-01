@@ -15,8 +15,10 @@ ai-active-suspension-2/
 │   ├── include/          # Header files
 │   └── README.md         # Firmware documentation
 │
-└── app/                   # PWA frontend (React + Vite)
-    ├── src/              # React application
+└── app/                   # PWA frontend (Static HTML + Express)
+    ├── dist/             # Static web app (HTML/CSS/JS)
+    ├── server.js         # HTTPS server + ESP32 proxy
+    ├── certs/            # Local HTTPS certificates
     ├── package.json      # Dependencies
     └── README.md         # App documentation
 ```
@@ -33,12 +35,15 @@ ai-active-suspension-2/
 - **Persistent Storage**: SPIFFS-based configuration
 
 ### PWA Application
-- **Modern React UI**: Fast, responsive interface
+- **Static HTML/CSS/JS UI**: Fast, responsive mobile-first interface
 - **Real-time Data**: WebSocket connection to ESP32
-- **Configuration Management**: Live parameter adjustment
-- **Battery Monitoring**: Color-coded voltage display
-- **Native App Support**: Package as Android APK via Capacitor
-- **Offline Detection**: Connection status with retry
+- **Multi-Page Interface**: Dashboard, Settings, Tuning, Lights, FPV
+- **Auto-Level Setup**: Visual bubble level for chassis leveling
+- **Servo Configuration**: Range, trim, and rotation controls with lock feature
+- **Network Management**: Home WiFi and Stand Alone mode switching
+- **Live Debugging**: Console output and configuration viewer
+- **HTTPS Server**: Secure local development with ESP32 API/WebSocket proxy
+- **Progressive Web App**: Installable on mobile devices
 
 ## Quick Start
 
@@ -57,10 +62,10 @@ See [firmware/README.md](firmware/README.md) for complete details.
 ```bash
 cd app
 npm install
-npm run dev
+npm run serve
 ```
 
-Open http://localhost:3000 in browser. See [app/README.md](app/README.md) for complete details.
+Open https://localhost:3443 in browser. Accept security warning for local cert. See [app/README.md](app/README.md) for complete details.
 
 ## Hardware Requirements
 
@@ -89,9 +94,9 @@ Open http://localhost:3000 in browser. See [app/README.md](app/README.md) for co
 
 ### Communication Flow
 ```
-PWA App (React) ←→ HTTP/WebSocket ←→ ESP32 (API Server)
-                                           ↓
-                                  [MPU6050 + Servos + Batteries]
+Browser (Static HTML) ←→ HTTPS/WSS ←→ Express Proxy ←→ HTTP/WS ←→ ESP32
+                                                                    ↓
+                                                           [MPU6050 + Servos]
 ```
 
 ### API Endpoints

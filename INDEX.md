@@ -73,16 +73,29 @@ ai-active-suspension-2/
 ├── package.json                # Project metadata
 ├── INSTRUCTIONS.json           # Build instructions
 │
-├── src/
-│   └── main.cpp               # Main firmware code (50 Hz loop, initialization)
+├── firmware/
+│   ├── src/
+│   │   └── main.cpp           # Main firmware code (50 Hz loop, initialization)
+│   │
+│   └── include/
+│       ├── Config.h           # Constants, data structures, GPIO pins
+│       ├── SensorFusion.h     # Complementary filter algorithm
+│       ├── SuspensionSimulator.h # Physics simulation for 4 corners
+│       ├── StorageManager.h   # SPIFFS persistence layer
+│       ├── PWMOutputs.h       # Servo PWM driver
+│       └── WebServer.h        # Async web API server
 │
-├── include/
-│   ├── Config.h               # Constants, data structures, GPIO pins
-│   ├── SensorFusion.h         # Complementary filter algorithm
-│   ├── SuspensionSimulator.h   # Physics simulation for 4 corners
-│   ├── StorageManager.h       # SPIFFS persistence layer
-│   ├── PWMOutputs.h           # Servo PWM driver
-│   └── WebServer.h            # Async web server + HTML UI
+├── app/
+│   ├── dist/                  # Static web app (HTML/CSS/JS)
+│   │   ├── index.html         # Main application
+│   │   ├── css/               # Stylesheets and fonts
+│   │   ├── js/                # JavaScript libraries
+│   │   └── plugins/           # UI components
+│   │
+│   ├── server.js              # HTTPS server + ESP32 proxy
+│   ├── certs/                 # SSL certificates
+│   ├── package.json           # Server dependencies
+│   └── README.md              # App documentation
 │
 └── .github/
     └── copilot-instructions.md # Development instructions

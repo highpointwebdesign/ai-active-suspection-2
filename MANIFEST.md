@@ -33,7 +33,19 @@ ai-active-suspension-2/
 │     ├─ SuspensionSimulator.h ....... Physics simulation (100 lines)
 │     ├─ StorageManager.h ............ SPIFFS persistence (100 lines)
 │     ├─ PWMOutputs.h ................ Servo driver (60 lines)
-│     └─ WebServer.h ................. Web UI & API (350 lines)
+│     └─ WebServer.h ................. Web API server (350 lines)
+│
+├─ 🌐 WEB APP (Static HTML/CSS/JS)
+│  ├─ dist/
+│  │  ├─ index.html .................. Main application (~5600 lines)
+│  │  ├─ css/ ........................ Stylesheets and fonts
+│  │  ├─ js/ ......................... JavaScript libraries
+│  │  └─ plugins/ .................... UI components (range sliders)
+│  │
+│  ├─ server.js ...................... HTTPS server + ESP32 proxy
+│  ├─ certs/ ......................... Local SSL certificates
+│  ├─ package.json ................... Server dependencies
+│  └─ README.md ...................... App documentation
 │
 ├─ ⚙️ BUILD & CONFIG (3 files)
 │  ├─ platformio.ini ................. Build configuration

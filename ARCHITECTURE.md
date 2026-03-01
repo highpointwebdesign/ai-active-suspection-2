@@ -2,7 +2,7 @@
 
 ## Executive Summary
 
-This is a complete **ESP32 firmware project** that transforms a simple microcontroller into an **active suspension simulator** for RC vehicles. It reads motion data from an MPU6050 6-axis IMU (accelerometer + gyroscope), processes it through sensor fusion algorithms, simulates realistic suspension physics, and outputs the results as servo control signals. A mobile-friendly web interface allows users to adjust suspension parameters in real-time.
+This is a complete **ESP32 firmware project** that transforms a simple microcontroller into an **active suspension controller** for RC vehicles. It reads motion data from an MPU6050 6-axis IMU (accelerometer + gyroscope), processes it through sensor fusion algorithms, simulates realistic suspension physics, and outputs the results as servo control signals. A mobile-friendly static web interface served via HTTPS allows users to configure and monitor the system in real-time.
 
 **Key Features**:
 - ✓ Real-time sensor fusion (complementary filter)
